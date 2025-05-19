@@ -1,0 +1,89 @@
+USER EXPERIENCE SPECIFICATIONS
+
+ENTRY POINT & FIRST-TIME USER EXPERIENCE
+
+1. Launch & Permissions
+- Geolocation permission request
+- Manual location fallback
+- Initial onboarding tooltips
+
+2. Initial Discovery
+- Immediate map/list view of nearby venues
+- Active deal highlights
+- First-time user guidance
+
+CORE USER FLOWS
+
+1. Landing View
+- React-based map (Google/Mapbox)
+- Filter chips (Tailwind/Material UI)
+- List/map view toggle
+- "Discover" and "For Bars" navigation tabs
+
+2. Filtering & Exploration
+- Dynamic filter application
+- Real-time results updates
+- Deal banner visibility
+- Smooth transitions
+
+3. Bar Detail View
+- Deal information
+- Venue details from Google Places
+- Photos and reviews
+- Quick actions (navigation, sharing)
+
+4. Push Notification Flow
+- Proximity-based alerts
+- Deal notifications
+- Action prompts
+
+5. Feedback Collection
+- Post-visit triggers
+- Single-question format
+- Non-intrusive design
+
+OWNER EXPERIENCE
+
+1. Onboarding
+- Streamlined verification process
+- Document upload guidance
+- Clear status indicators
+
+2. Dashboard
+- Deal management interface
+- Analytics overview
+- Venue information updates
+
+INTERFACE GUIDELINES
+
+1. Component Strategy
+- Modular, reusable components
+- Consistent styling with Tailwind
+- Responsive design patterns
+
+2. Visual Hierarchy
+- Deal prominence
+- Clear CTAs
+- Status indicators
+- Loading states
+
+3. Interaction Design
+- Smooth transitions
+- Gesture support
+- Error handling
+- Feedback loops
+
+ACCESSIBILITY
+
+1. Standards
+- WCAG AA compliance
+- Screen reader support
+- Color contrast requirements
+- Touch target sizing
+
+2. Edge Cases
+- Offline mode
+- Location services disabled
+- Push notifications denied
+- Loading states
+- Error recovery 

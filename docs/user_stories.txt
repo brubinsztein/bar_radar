@@ -1,0 +1,31 @@
+USER STORIES BY ROLE
+
+BAR-GOER
+
+1. As a bar-goer, I want to see a map of bars near me, so that I can spontaneously pick the best spot.
+
+2. As a bar-goer, I want to filter bars by atmosphere and features (sunny/garden, live music, ale selection, pool tables/darts boards, dog friendly etc), as well as if theirs space for my group size, so that I can match the vibe to my group.
+
+3. As a bar-goer, I want to get notified of real-time flash sales or happy hours, so I never miss out on deals nearby, once I'm out drinking.
+
+4. As a bar-goer, I want to provide feedback about how busy a bar is or if a deal is still running, so others benefit from up-to-date info.
+
+5. As a bar-goer, I want to quickly access reviews and ratings from trusted sources.
+
+BAR OWNER
+
+1. As a verified bar/pub owner, I want to upload flash sales and promotions, so I can fill empty tables and attract more customers during slow periods.
+
+2. As a bar owner, I want to apply for verification with minimal friction, so I can start promoting my venue quickly.
+
+3. As a bar owner, I want to see basic analytics (deal views/redemptions), so I understand engagement and promotion effectiveness.
+
+4. As a bar owner, I want the option to update my bar details and images as needed.
+
+ADMIN
+
+1. As a Bar Radar admin, I want to manually review and verify bar owner applications, ensuring only legitimate businesses promote deals.
+
+2. As an admin, I want to approve or reject flash deal postings as needed and moderate abuse/reports.
+
+3. As an admin, I want to see basic analytics (deal views/redemptions), so I understand engagement and promotion effectiveness. 

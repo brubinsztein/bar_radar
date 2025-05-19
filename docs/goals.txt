@@ -1,0 +1,20 @@
+BUSINESS GOALS
+
+1. Acquire at least 2,000 users in East London (Hackney) within 3 months of launch.
+2. Onboard a minimum of 40 verified bar/pub owners to promote flash deals in the pilot region.
+3. Establish a partnership with at least one local bar chain for ongoing collaboration and promotional events.
+4. Achieve daily active user (DAU) to monthly active user (MAU) ratio above 20% in the target area at 60 days post-launch.
+
+USER GOALS
+
+1. Instantly find nearby bars or pubs with live deals matched to their preferences (number of people in the group, outdoor seating, ale selection, etc.).
+2. Experience seamless geolocation-based discovery and get real-time notifications about flash sales.
+3. Trust that promoted deals are real and available thanks to crowdsourced and owner-verified updates.
+4. Easily filter by key preferences such as atmosphere, amenities, and live events.
+5. Quick access to trusted reviews and essential venue info powered by Google Places.
+
+NON-GOALS (MVP)
+
+1. Table reservation or booking system
+2. In-app payments, tipping, or loyalty/reward features
+3. Automated bar owner verification (remains manual/admin-driven) 

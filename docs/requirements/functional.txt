@@ -1,0 +1,50 @@
+FUNCTIONAL REQUIREMENTS (MVP)
+
+USER FEATURES
+
+1. Discovery Map/List
+- Interactive map and list views showing nearby bars/pubs based on user location
+- Filters for essential bar criteria (serves food, sunny/garden, cask ales/real ales, live music, pub quiz, dog-friendly, games etc)
+- Active flash deals displayed prominently on map/list and bar details
+
+2. Notifications & Alerts
+- Push notifications for real-time alerts when near a venue with a new flash deal
+- Google Places Integration for venue metadata (address, opening hours, photos, review scores)
+
+3. User Feedback
+- Crowdsourced feedback loop via short popup questionnaire post-visit
+- Quick feedback options: Is it busy? Is the deal on? Venue accurate?
+
+OWNER FEATURES
+
+1. Verification Process
+- Account creation and venue claiming
+- Document submission via templated email (ID, proof of management)
+- Manual admin approval required
+
+2. Deal Management
+- Flash sale/deal creator with timeboxed offers
+- Deal description, timing, and quantity limits
+- Basic analytics dashboard (views/redemptions)
+- Venue info update capabilities
+
+3. Moderation
+- Built-in report/flag feature for users
+- Deal status updates and management
+
+ADMIN FEATURES
+
+1. Verification Management
+- Manual verification portal for owner documents
+- Venue legitimacy verification tools
+- Application approval/denial system
+
+2. Content Moderation
+- Deal review and moderation tools
+- Flagged content review system
+- Abuse prevention measures
+
+3. Analytics
+- User growth metrics
+- Deal participation statistics
+- System health monitoring 

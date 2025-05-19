@@ -1,0 +1,9 @@
+PROJECT OVERVIEW
+
+Bar Radar makes it effortless for users in London to discover bars and pubs with real-time flash deals, curated and promoted by verified bar owners. Leveraging geolocation, push notifications, and enhanced venue data from Google Places, users enjoy hyperlocal, preference-matched recommendations, while owners fill empty tables fast. The MVP targets both discovery and immediate deal promotion, focusing adoption in East London (UK).
+
+USER NARRATIVE
+
+It's a sunny Friday in Hackney, and Sophie and her friends are craving a lively pub garden with cold cask ales—without endless scrolling or guesswork. Sophie launches Bar Radar. The app pinpoints her location and she filters pubs nearby for "dog-friendly," "cask ale," and "outdoor seating." A glowing icon signals a flash happy-hour sale at a pub two streets over, corroborated by strong reviews and up-to-date crowdsourced info saying "plenty of tables available."
+
+Meanwhile, Sam, the pub owner, notices the early-evening lull and wants to fill the garden before sunset. He logs into Bar Radar's owner portal, uploads a quick photo and proof of ownership, and crafts a 2-for-1 ale happy hour—targeted at nearby app users. Within moments, push notifications go out. Sophie and her crew spot the offer, check reviews, and make their way over. As customers pour in, Sam updates the deal status from his dashboard, tracking redemptions through Bar Radar. Later, Sophie shares brief feedback, keeping future users in the loop. The result: a bustling, happy beer garden, delighted users, and genuine business impact—all powered by Bar Radar. 

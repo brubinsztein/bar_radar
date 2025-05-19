@@ -1,0 +1,71 @@
+SUCCESS METRICS & TRACKING PLAN
+
+USER-CENTRIC METRICS
+
+1. Growth Metrics
+- New user signups in East/Hackney per week
+- Daily Active Users (DAU)
+- Monthly Active Users (MAU)
+- DAU/MAU ratio (target: >20%)
+
+2. Engagement Metrics
+- Flash deal clickthrough rates
+- Deal redemption rates
+- User feedback response rates
+- Push notification opt-in rate
+
+BUSINESS METRICS
+
+1. Venue Metrics
+- Verified bar/pub owners onboarded (weekly/monthly)
+- Active flash deals per day
+- Local bar chain partnerships established
+- Deal quality ratio (reported/fake vs. legitimate)
+
+2. Performance Metrics
+- App uptime percentage (target: 99.5%+)
+- Push notification delivery rate (>98%)
+- Owner verification processing time
+- User retention rates
+
+TRACKING PLAN
+
+1. User Events
+- App opens and session duration
+- Map/list view interactions
+- Filter usage patterns
+- Deal clicks and redemptions
+- Feedback submissions
+- Push notification engagement
+
+2. Owner Events
+- Verification submissions
+- Deal creation frequency
+- Analytics dashboard usage
+- Venue information updates
+
+3. Admin Events
+- Verification processing time
+- Deal moderation actions
+- System health metrics
+- Support ticket volume
+
+4. Technical Events
+- API response times
+- Error rates and types
+- Cache hit rates
+- Database performance
+
+DATA COLLECTION
+
+1. Analytics Implementation
+- Event tracking setup
+- User property tracking
+- Custom dimensions
+- Conversion funnels
+
+2. Reporting
+- Daily automated reports
+- Weekly business metrics
+- Monthly growth analysis
+- Quarterly performance review 

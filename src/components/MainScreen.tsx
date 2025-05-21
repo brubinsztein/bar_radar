@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { View, StyleSheet, SafeAreaView, Modal, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { HeaderBar } from './HeaderBar';
@@ -10,9 +10,14 @@ import { MAP_CONFIG } from '../config/constants';
 import { BarMarker } from './BarMarker';
 
 const FILTER_MAP: Record<string, Partial<BarFilter>> = {
+  bar: { type: 'bar' },
+  pub: { type: 'pub' },
+  '4star': { minRating: 4 },
+  openNow: { openNow: true },
   outside: { type: 'pub', openNow: true },
   garden: { type: 'bar', maxPriceLevel: 2 },
   pool: { type: 'pub', minRating: 3.5 },
+  // openLate handled as a modal for now
 };
 
 export function MainScreen() {
@@ -31,12 +36,11 @@ export function MainScreen() {
 
   // Handle filter selection (toggle off if same filter is clicked)
   const handleFilterSelect = (filterKey: string | null) => {
-    if (filterKey === 'deals') {
-      console.log('Deals modal triggered');
-      setShowDealsModal(true);
-      return;
-    }
     setSelectedFilter(prev => (prev === filterKey ? null : filterKey));
+  };
+
+  const handleSpecialFilter = (filterKey: string) => {
+    setShowDealsModal(true);
   };
 
   // Compose filter object from selected filter
@@ -106,12 +110,10 @@ export function MainScreen() {
         >
           <Text style={styles.refreshButtonIconSubtle}>📍</Text>
         </TouchableOpacity>
-        {/* Floating BarCountPill */}
-        <View style={styles.floatingBarCountPillContainer} pointerEvents="box-none">
-          <BarCountPill count={filteredBars.length} />
+        {/* Floating FilterBar */}
+        <View style={styles.floatingFilterBarContainer} pointerEvents="box-none">
+          <FilterBar selected={selectedFilter} onSelect={handleFilterSelect} count={filteredBars.length} onSpecialFilter={handleSpecialFilter} />
         </View>
-        <View style={styles.spacer} />
-        <FilterBar selected={selectedFilter} onSelect={handleFilterSelect} />
         {/* Deals Coming Soon Modal Overlay */}
         {showDealsModal && (
           <View style={styles.modalOverlayAbsolute}>
@@ -146,14 +148,11 @@ const styles = StyleSheet.create({
   mapPlaceholder: {
     flex: 1,
     backgroundColor: '#EAF6FA',
-    marginHorizontal: 8,
-    marginTop: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-  },
-  spacer: {
-    height: 12,
+    marginHorizontal: 0,
+    marginTop: 0,
+    borderRadius: 0,
+    borderWidth: 0,
+    borderColor: 'transparent',
   },
   floatingHeaderBarContainer: {
     position: 'absolute',
@@ -168,15 +167,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 12,
     elevation: 8,
-  },
-  floatingBarCountPillContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 80,
-    alignItems: 'center',
-    zIndex: 150,
-    // You can tweak bottom value for perfect spacing
   },
   modalOverlayAbsolute: {
     position: 'absolute',
@@ -226,7 +216,7 @@ const styles = StyleSheet.create({
   },
   refreshButtonSubtle: {
     position: 'absolute',
-    top: 90,
+    top: 130,
     left: 16,
     backgroundColor: 'rgba(255,255,255,0.7)',
     borderRadius: 18,
@@ -246,5 +236,12 @@ const styles = StyleSheet.create({
   refreshButtonIconSubtle: {
     fontSize: 20,
     color: '#888',
+  },
+  floatingFilterBarContainer: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: 44,
+    zIndex: 100,
   },
 }); 

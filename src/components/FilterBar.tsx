@@ -11,13 +11,18 @@ const FILTERS = [
   { key: 'outside', label: 'Outside', emoji: '☀️' },
   { key: 'garden', label: 'Garden', emoji: '🌳' },
   { key: 'pool', label: 'Pool', emoji: '🎱' },
+  { key: 'realAle', label: 'Real Ale', emoji: '🍺' },
+  { key: 'realFire', label: 'Real Fire', emoji: '🔥' },
+  { key: 'dog', label: 'Dog Friendly', emoji: '🐶' },
+  { key: 'wheelchair', label: 'Wheelchair', emoji: '♿' },
 ];
 
-export function FilterBar({ selected, onSelect, count, onSpecialFilter }: {
-  selected: string | null;
-  onSelect: (key: string | null) => void;
+export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear }: {
+  selected: string[];
+  onSelect: (key: string) => void;
   count: number;
   onSpecialFilter?: (key: string) => void;
+  onClear?: () => void;
 }) {
   return (
     <View style={styles.container}>
@@ -27,30 +32,35 @@ export function FilterBar({ selected, onSelect, count, onSpecialFilter }: {
         contentContainerStyle={styles.scrollContent}
         bounces={false}
       >
-        {/* All/Clear button with count */}
-        <TouchableOpacity
-          style={[styles.filter, !selected && styles.selected]}
-          onPress={() => onSelect(null)}
-        >
-          <Text style={[styles.label, !selected && styles.selectedLabel]}>All </Text>
-          <Text style={styles.count}>({count})</Text>
-        </TouchableOpacity>
+        {/* Show Clear button if any filter is selected */}
+        {onClear && (
+          <TouchableOpacity
+            style={[styles.filter, styles.clearButton]}
+            onPress={onClear}
+          >
+            <Text style={[styles.label, styles.clearLabel]}>Clear</Text>
+          </TouchableOpacity>
+        )}
         {FILTERS.map(f => (
           <TouchableOpacity
             key={f.key}
-            style={[styles.filter, selected === f.key && styles.selected]}
+            style={[styles.filter, selected.includes(f.key) && styles.selected]}
             onPress={() => {
-              if (['deals', 'outside', 'openLate'].includes(f.key)) {
+              if (["deals", "outside", "openLate"].includes(f.key)) {
                 onSpecialFilter && onSpecialFilter(f.key);
               } else {
-                onSelect(selected === f.key ? null : f.key);
+                onSelect(f.key);
               }
             }}
           >
             <Text style={styles.emoji}>{f.emoji}</Text>
-            <Text style={[styles.label, selected === f.key && styles.selectedLabel]}>{f.label}</Text>
+            <Text style={[styles.label, selected.includes(f.key) && styles.selectedLabel]}>{f.label}</Text>
           </TouchableOpacity>
         ))}
+        {/* Bar count badge */}
+        <View style={styles.countPill}>
+          <Text style={styles.countText}>{count}</Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -105,5 +115,29 @@ const styles = StyleSheet.create({
     color: '#FF3B30',
     fontWeight: 'bold',
     marginLeft: 2,
+  },
+  clearButton: {
+    backgroundColor: '#FF3B30',
+    marginRight: 8,
+  },
+  clearLabel: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  countPill: {
+    backgroundColor: '#5B4EFF',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginLeft: 8,
+    alignSelf: 'center',
+    minWidth: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 }); 

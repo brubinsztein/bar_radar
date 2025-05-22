@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useRef } from 'react';
-import { View, StyleSheet, SafeAreaView, Modal, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
+import { View, StyleSheet, SafeAreaView, Modal, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Linking } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { HeaderBar } from './HeaderBar';
 import { BarCountPill } from './BarCountPill';
@@ -8,6 +8,9 @@ import { useApp } from '../core/AppContext';
 import { filterBars, BarFilter } from '../utils/filterBars';
 import { MAP_CONFIG } from '../config/constants';
 import { BarMarker } from './BarMarker';
+import { Ionicons } from '@expo/vector-icons';
+import { Bar } from '../types';
+import { BarDetailsSheet } from './BarDetailsSheet';
 
 const FILTER_MAP: Record<string, Partial<BarFilter>> = {
   bar: { type: 'bar' },
@@ -18,15 +21,40 @@ const FILTER_MAP: Record<string, Partial<BarFilter>> = {
   garden: { type: 'bar', maxPriceLevel: 2 },
   pool: { type: 'pub', minRating: 3.5 },
   // openLate handled as a modal for now
+  realAle: { realAle: true },
+  realFire: { realFire: true },
+  dog: { dog: true },
+  wheelchair: { wheelchair: true }
 };
 
 export function MainScreen() {
   const { bars, location } = useApp();
-  const [selectedFilter, setSelectedFilter] = useState<string | null>('garden');
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [showDealsModal, setShowDealsModal] = useState(false);
+  const [selectedBar, setSelectedBar] = useState<Bar | null>(null);
 
   // Debug logs
-  console.log('MainScreen rendered');
+  console.log('MainScreen render', {
+    isLoading: bars.isLoading,
+    bars: bars.bars,
+    error: bars.error,
+    locationLoading: location.isLoading,
+    location: location.location,
+  });
+  console.log('Selected filters:', selectedFilters);
+  // Combine all selected filters into one BarFilter
+  const combinedFilter: BarFilter = useMemo(() => {
+    if (!selectedFilters.length) return {};
+    return selectedFilters.reduce((acc, key) => {
+      return { ...acc, ...FILTER_MAP[key] };
+    }, {} as BarFilter);
+  }, [selectedFilters]);
+  const filteredBars = useMemo(() => {
+    const fb = filterBars(bars.bars, combinedFilter);
+    console.log('Filtered bars:', fb.map(b => b.name));
+    return fb;
+  }, [bars.bars, combinedFilter]);
+
   React.useEffect(() => {
     console.log('Location loaded', location);
   }, [location.location, location.isLoading]);
@@ -34,41 +62,56 @@ export function MainScreen() {
     console.log('Bars loaded', bars);
   }, [bars.bars, bars.isLoading]);
 
-  // Handle filter selection (toggle off if same filter is clicked)
-  const handleFilterSelect = (filterKey: string | null) => {
-    setSelectedFilter(prev => (prev === filterKey ? null : filterKey));
-  };
+  // Handle filter selection (toggle on/off for multi-select)
+  const handleFilterSelect = useCallback((filterKey: string) => {
+    setSelectedFilters(prev => {
+      if (prev.includes(filterKey)) {
+        return prev.filter(f => f !== filterKey);
+      } else {
+        return [...prev, filterKey];
+      }
+    });
+  }, []);
 
-  const handleSpecialFilter = (filterKey: string) => {
+  const handleSpecialFilter = useCallback((filterKey: string) => {
+    console.log('Special filter selected:', filterKey);
     setShowDealsModal(true);
+  }, []);
+
+  // Handle clear filters
+  const handleClearFilters = useCallback(() => {
+    setSelectedFilters([]);
+  }, []);
+
+  // Open Google Maps directions
+  const openDirections = (bar: Bar | null) => {
+    if (!bar) return;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${bar.location.latitude},${bar.location.longitude}`;
+    Linking.openURL(url);
   };
-
-  // Compose filter object from selected filter
-  const filter: BarFilter = useMemo(() => {
-    return selectedFilter ? (FILTER_MAP[selectedFilter] || {}) : {};
-  }, [selectedFilter]);
-
-  // Filter bars using backend logic
-  const filteredBars = useMemo(() => filterBars(bars.bars, filter), [bars.bars, filter]);
 
   // Global loading indicator
   if (location.isLoading || bars.isLoading) {
-    return (
-      <View style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(255,255,255,0.85)',
-        zIndex: 99999,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-        <ActivityIndicator size="large" color="#5B4EFF" />
-        <Text style={{ marginTop: 16, fontSize: 18, color: '#222' }}>Loading...</Text>
-      </View>
-    );
+    // Only show loading screen if we don't have any data yet
+    if (!bars.bars.length && !location.location) {
+      console.log('SHOWING LOADING SCREEN', { locationLoading: location.isLoading, barsLoading: bars.isLoading });
+      return (
+        <View style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(255,255,255,0.85)',
+          zIndex: 99999,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          <ActivityIndicator size="large" color="#5B4EFF" />
+          <Text style={{ marginTop: 16, fontSize: 18, color: '#222' }}>Loading...</Text>
+        </View>
+      );
+    }
   }
 
   return (
@@ -86,6 +129,10 @@ export function MainScreen() {
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
           } : MAP_CONFIG.DEFAULT_REGION}
+          showsCompass={false}
+          showsMyLocationButton={false}
+          toolbarEnabled={false}
+          onPress={() => setSelectedBar(null)}
         >
           {/* User location marker */}
           {location.location && (
@@ -99,7 +146,12 @@ export function MainScreen() {
             />
           )}
           {filteredBars.map((bar) => (
-            <BarMarker key={bar.id} bar={bar} onPress={() => {}} />
+            <BarMarker 
+              key={bar.id} 
+              bar={bar} 
+              onPress={() => setSelectedBar(bar)}
+              isSelected={selectedBar?.id === bar.id}
+            />
           ))}
         </MapView>
         {/* Subtle Refresh Location Button (top left) */}
@@ -112,8 +164,29 @@ export function MainScreen() {
         </TouchableOpacity>
         {/* Floating FilterBar */}
         <View style={styles.floatingFilterBarContainer} pointerEvents="box-none">
-          <FilterBar selected={selectedFilter} onSelect={handleFilterSelect} count={filteredBars.length} onSpecialFilter={handleSpecialFilter} />
+          <FilterBar 
+            selected={selectedFilters} 
+            onSelect={handleFilterSelect} 
+            count={filteredBars.length} 
+            onSpecialFilter={handleSpecialFilter} 
+            onClear={selectedFilters.length > 0 ? handleClearFilters : undefined}
+          />
         </View>
+        {/* Bar count pill always visible */}
+        <BarCountPill count={filteredBars.length} />
+        {/* Floating Directions FAB */}
+        {selectedBar && (
+          <TouchableOpacity
+            style={styles.fabDirections}
+            onPress={() => openDirections(selectedBar)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.fabDirectionsLabel}>Directions</Text>
+            <Ionicons name="navigate" size={28} color="#fff" />
+          </TouchableOpacity>
+        )}
+        {/* Bar Details Sheet */}
+        <BarDetailsSheet bar={selectedBar} visible={!!selectedBar} onClose={() => setSelectedBar(null)} />
         {/* Deals Coming Soon Modal Overlay */}
         {showDealsModal && (
           <View style={styles.modalOverlayAbsolute}>
@@ -243,5 +316,34 @@ const styles = StyleSheet.create({
     right: 16,
     bottom: 44,
     zIndex: 100,
+  },
+  fabDirections: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'absolute',
+    right: 28,
+    bottom: 120,
+    backgroundColor: '#5B4EFF',
+    borderRadius: 32,
+    width: 'auto',
+    height: 56,
+    paddingHorizontal: 18,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 6,
+    zIndex: 200,
+  },
+  fabDirectionsLabel: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 10,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
 }); 

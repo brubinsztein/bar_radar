@@ -41,6 +41,10 @@ export function useLocation(): UseLocationResult {
     requestPermission();
   }, []);
 
+  useEffect(() => {
+    console.log('[useLocation] State changed', { location, error, isLoading });
+  }, [location, error, isLoading]);
+
   return {
     location,
     error,

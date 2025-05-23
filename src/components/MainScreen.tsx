@@ -33,15 +33,6 @@ export function MainScreen() {
   const [showDealsModal, setShowDealsModal] = useState(false);
   const [selectedBar, setSelectedBar] = useState<Bar | null>(null);
 
-  // Debug logs
-  console.log('MainScreen render', {
-    isLoading: bars.isLoading,
-    bars: bars.bars,
-    error: bars.error,
-    locationLoading: location.isLoading,
-    location: location.location,
-  });
-  console.log('Selected filters:', selectedFilters);
   // Combine all selected filters into one BarFilter
   const combinedFilter: BarFilter = useMemo(() => {
     if (!selectedFilters.length) return {};
@@ -49,18 +40,11 @@ export function MainScreen() {
       return { ...acc, ...FILTER_MAP[key] };
     }, {} as BarFilter);
   }, [selectedFilters]);
-  const filteredBars = useMemo(() => {
-    const fb = filterBars(bars.bars, combinedFilter);
-    console.log('Filtered bars:', fb.map(b => b.name));
-    return fb;
-  }, [bars.bars, combinedFilter]);
 
-  React.useEffect(() => {
-    console.log('Location loaded', location);
-  }, [location.location, location.isLoading]);
-  React.useEffect(() => {
-    console.log('Bars loaded', bars);
-  }, [bars.bars, bars.isLoading]);
+  // Compute filtered bars
+  const filteredBars = useMemo(() => {
+    return filterBars(bars.bars, combinedFilter);
+  }, [bars.bars, combinedFilter]);
 
   // Handle filter selection (toggle on/off for multi-select)
   const handleFilterSelect = useCallback((filterKey: string) => {
@@ -149,7 +133,10 @@ export function MainScreen() {
             <BarMarker 
               key={bar.id} 
               bar={bar} 
-              onPress={() => setSelectedBar(bar)}
+              onPress={() => {
+                console.log('[MainScreen] Bar marker pressed:', bar.name);
+                setSelectedBar(bar);
+              }}
               isSelected={selectedBar?.id === bar.id}
             />
           ))}
@@ -172,8 +159,6 @@ export function MainScreen() {
             onClear={selectedFilters.length > 0 ? handleClearFilters : undefined}
           />
         </View>
-        {/* Bar count pill always visible */}
-        <BarCountPill count={filteredBars.length} />
         {/* Floating Directions FAB */}
         {selectedBar && (
           <TouchableOpacity

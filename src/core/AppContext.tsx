@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useRef, useEffect } from 'react';
 import { useLocation } from '../hooks/useLocation';
 import { useBars } from '../hooks/useBars';
 import { Bar } from '../types';
@@ -13,14 +13,19 @@ const AppContext = createContext<AppContextType | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const bars = useBars();
+  const lastLocationRef = useRef<string | null>(null);
 
-  // Fetch bars when location changes
-  React.useEffect(() => {
+  // Fetch bars when location changes (but not on every render)
+  useEffect(() => {
     if (location.location) {
-      bars.fetchBars(
-        location.location.coords.latitude,
-        location.location.coords.longitude
-      );
+      const locString = `${location.location.coords.latitude},${location.location.coords.longitude}`;
+      if (lastLocationRef.current !== locString) {
+        lastLocationRef.current = locString;
+        bars.fetchBars(
+          location.location.coords.latitude,
+          location.location.coords.longitude
+        );
+      }
     }
   }, [location.location]);
 

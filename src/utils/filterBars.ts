@@ -27,69 +27,44 @@ function isPub(bar: Bar): boolean {
 }
 
 export function filterBars(bars: Bar[], filter: BarFilter): Bar[] {
-  console.log('[filterBars] Input:', {
-    totalBars: bars.length,
-    filter,
-    barTypes: bars.map(b => ({ 
-      name: b.name, 
-      types: JSON.stringify(b.types), 
-      osmTags: b.osmTags 
-    }))
-  });
-  
   const filtered = bars.filter(bar => {
     // Always exclude restaurants
     if (bar.types?.includes('restaurant')) {
-      console.log(`[filterBars] Excluding ${bar.name} - is a restaurant, types:`, JSON.stringify(bar.types));
       return false;
     }
     // Type filter
     if (filter.type === 'pub' && !isPub(bar)) {
-      console.log(`[filterBars] Excluding ${bar.name} - not a pub, types:`, JSON.stringify(bar.types));
       return false;
     }
     if (filter.type === 'bar' && !bar.types.includes('bar')) {
-      console.log(`[filterBars] Excluding ${bar.name} - not a bar, types:`, JSON.stringify(bar.types));
       return false;
     }
     // Rating filter
     if (filter.minRating !== undefined && (bar.rating ?? 0) < filter.minRating) {
-      console.log(`[filterBars] Excluding ${bar.name} - rating too low:`, bar.rating);
       return false;
     }
     // Price level filter
     if (filter.maxPriceLevel !== undefined && (bar.priceLevel ?? 99) > filter.maxPriceLevel) {
-      console.log(`[filterBars] Excluding ${bar.name} - price level too high:`, bar.priceLevel);
       return false;
     }
     // Open now filter
     if (filter.openNow && bar.isOpen === false) {
-      console.log(`[filterBars] Excluding ${bar.name} - not open`);
       return false;
     }
     // OSM tags filters
     if (filter.realAle && !bar.osmTags?.real_ale) {
-      console.log(`[filterBars] Excluding ${bar.name} - no real ale`);
       return false;
     }
     if (filter.realFire && !bar.osmTags?.real_fire) {
-      console.log(`[filterBars] Excluding ${bar.name} - no real fire`);
       return false;
     }
     if (filter.dog && !bar.osmTags?.dog) {
-      console.log(`[filterBars] Excluding ${bar.name} - not dog friendly`);
       return false;
     }
     if (filter.wheelchair && !bar.osmTags?.wheelchair) {
-      console.log(`[filterBars] Excluding ${bar.name} - not wheelchair accessible`);
       return false;
     }
     return true;
-  });
-
-  console.log('[filterBars] Output:', {
-    filteredCount: filtered.length,
-    filteredBars: filtered.map(b => b.name)
   });
   
   return filtered;
@@ -128,5 +103,4 @@ if (require.main === module) {
 
   const filter: BarFilter = { type: 'pub', minRating: 4.0, openNow: true };
   const filtered = filterBars(bars, filter);
-  console.log('Filtered bars:', filtered);
 } 

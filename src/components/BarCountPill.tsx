@@ -3,35 +3,38 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export function BarCountPill({ count }: { count: number }) {
-  const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.pill, { bottom: insets.bottom + 80 }]}>
-      <Text style={styles.text}>Showing <Text style={styles.bold}>{count}</Text> bars</Text>
+    <View style={styles.bubble}>
+      <Text style={styles.bubbleText}>{count}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  pill: {
+  bubble: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#E6E9FF',
+    alignItems: 'center',
+    justifyContent: 'center',
     position: 'absolute',
-    alignSelf: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    paddingHorizontal: 24,
-    paddingVertical: 10,
+    top: -8,
+    left: -8,
+    zIndex: 99999,
+    paddingHorizontal: 4,
+    borderWidth: 1,
+    borderColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 4,
-    zIndex: 10,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  text: {
-    fontSize: 18,
-    color: '#222',
-  },
-  bold: {
-    fontWeight: 'bold',
+  bubbleText: {
     color: '#5B4EFF',
+    fontWeight: 'bold',
+    fontSize: 13,
+    textAlign: 'center',
   },
 }); 

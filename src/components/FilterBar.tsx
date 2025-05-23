@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { BarCountPill } from './BarCountPill';
 
 const FILTERS = [
   { key: 'bar', label: 'Bar', emoji: '🍸' },
@@ -26,6 +27,8 @@ export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear 
 }) {
   return (
     <View style={styles.container}>
+      {/* Subtle count bubble */}
+      <BarCountPill count={count} />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -57,10 +60,6 @@ export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear 
             <Text style={[styles.label, selected.includes(f.key) && styles.selectedLabel]}>{f.label}</Text>
           </TouchableOpacity>
         ))}
-        {/* Bar count badge */}
-        <View style={styles.countPill}>
-          <Text style={styles.countText}>{count}</Text>
-        </View>
       </ScrollView>
     </View>
   );
@@ -76,7 +75,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.18,
     shadowRadius: 16,
     elevation: 12,
-    overflow: 'hidden',
+    overflow: 'visible',
+    zIndex: 9999,
   },
   scrollContent: {
     flexDirection: 'row',
@@ -110,12 +110,6 @@ const styles = StyleSheet.create({
     color: '#5B4EFF',
     fontWeight: 'bold',
   },
-  count: {
-    fontSize: 16,
-    color: '#FF3B30',
-    fontWeight: 'bold',
-    marginLeft: 2,
-  },
   clearButton: {
     backgroundColor: '#FF3B30',
     marginRight: 8,
@@ -123,21 +117,5 @@ const styles = StyleSheet.create({
   clearLabel: {
     color: '#fff',
     fontWeight: 'bold',
-  },
-  countPill: {
-    backgroundColor: '#5B4EFF',
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    marginLeft: 8,
-    alignSelf: 'center',
-    minWidth: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  countText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
 }); 

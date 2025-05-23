@@ -8,7 +8,14 @@ interface BarMarkerProps {
   isSelected?: boolean;
 }
 
-export function BarMarker({ bar, onPress }: BarMarkerProps) {
+export function BarMarker({ bar, onPress, isSelected }: BarMarkerProps) {
+  // Validate coordinates
+  if (!bar.location?.latitude || !bar.location?.longitude || 
+      isNaN(bar.location.latitude) || isNaN(bar.location.longitude)) {
+    console.warn(`[BarMarker] Invalid coordinates for bar: ${bar.name}`, bar.location);
+    return null;
+  }
+
   return (
     <Marker
       coordinate={{
@@ -16,8 +23,9 @@ export function BarMarker({ bar, onPress }: BarMarkerProps) {
         longitude: bar.location.longitude,
       }}
       title={bar.name}
-      description={bar.vicinity}
+      description={bar.address}
       onPress={onPress}
+      pinColor={isSelected ? "#5B4EFF" : "#FF3B30"}
     />
   );
 }

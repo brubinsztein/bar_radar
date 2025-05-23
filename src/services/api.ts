@@ -96,4 +96,25 @@ export class PlacesApiService {
 
     return `${endpoint}?${params}`;
   }
+
+  static async searchNearbyBarsAllPages(
+    latitude: number,
+    longitude: number,
+    radius: number = 1000
+  ): Promise<Bar[]> {
+    let allBars: Bar[] = [];
+    let pageToken: string | undefined = undefined;
+    let page = 0;
+    do {
+      if (pageToken) {
+        // Google requires a short delay before next_page_token is valid
+        await new Promise(res => setTimeout(res, 2000));
+      }
+      const resp = await this.searchNearbyBars(latitude, longitude, radius, pageToken);
+      allBars = allBars.concat(resp.bars);
+      pageToken = resp.nextPageToken;
+      page++;
+    } while (pageToken && page < 3); // Google returns max 3 pages
+    return allBars;
+  }
 } 

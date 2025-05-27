@@ -15,7 +15,20 @@ export interface Bar {
     real_fire?: boolean;
     dog?: boolean;
     wheelchair?: boolean;
+    garden?: boolean;
+    food?: boolean;
+    craft_beer?: boolean;
+    live_music?: boolean;
+    quiz_night?: boolean;
+    board_games?: boolean;
+    sunday_roast?: boolean;
+    outdoor_seating?: boolean;
+    dj?: boolean;
+    street_food?: boolean;
+    nightlife?: boolean;
+    cocktails?: boolean;
     amenity?: string;
     opening_hours?: string;
+    features?: string;
   };
 } 

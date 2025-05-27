@@ -9,65 +9,139 @@ export interface BarFilter {
   realFire?: boolean;
   dog?: boolean;
   wheelchair?: boolean;
+  garden?: boolean;
+  food?: boolean;
+  craftBeer?: boolean;
+  liveMusic?: boolean;
+  quizNight?: boolean;
+  boardGames?: boolean;
+  sundayRoast?: boolean;
+  outdoorSeating?: boolean;
+  dj?: boolean;
+  streetFood?: boolean;
+  nightlife?: boolean;
+  cocktails?: boolean;
 }
 
 function isPub(bar: Bar): boolean {
-  // Check Google types
-  if (bar.types?.includes('pub')) return true;
+  return bar.types?.includes('pub') || bar.osmTags?.amenity === 'pub';
+}
+
+function isBar(bar: Bar): boolean {
+  return bar.types?.includes('bar') || bar.osmTags?.amenity === 'bar';
+}
+
+function hasFeature(bar: Bar, feature: string): boolean {
+  if (!bar.osmTags) return false;
   
-  // Check OSM tags
-  if (bar.osmTags?.amenity === 'pub') return true;
+  // Get the features string from osmTags
+  const featuresStr = bar.osmTags.features;
+  if (!featuresStr) return false;
+
+  // Split the features string into an array and check if it includes the feature
+  const features = featuresStr.split(',');
   
-  // Check for pub-related terms in name (but not just 'bar')
-  const pubTerms = ['pub', 'public house', 'tavern', 'inn', 'alehouse'];
-  const name = bar.name.toLowerCase();
-  if (pubTerms.some(term => name.includes(term))) return true;
-  
-  return false;
+  // Map feature names to their CSV equivalents
+  const featureMap: Record<string, string> = {
+    'real_ale': 'real_ale',
+    'real_fire': 'fireplace',
+    'dog': 'dog_friendly',
+    'wheelchair': 'wheelchair',
+    'garden': 'garden',
+    'food': 'food',
+    'craft_beer': 'craft_beer',
+    'live_music': 'live_music',
+    'quiz_night': 'quiz_night',
+    'board_games': 'board_games',
+    'sunday_roast': 'sunday_roast',
+    'outdoor_seating': 'outdoor_seating',
+    'dj': 'dj',
+    'street_food': 'street_food',
+    'nightlife': 'nightlife',
+    'cocktails': 'cocktails'
+  };
+
+  const csvFeature = featureMap[feature];
+  return csvFeature ? features.includes(csvFeature) : false;
 }
 
 export function filterBars(bars: Bar[], filter: BarFilter): Bar[] {
-  const filtered = bars.filter(bar => {
-    // Always exclude restaurants
-    if (bar.types?.includes('restaurant')) {
-      return false;
-    }
+  return bars.filter(bar => {
     // Type filter
     if (filter.type === 'pub' && !isPub(bar)) {
       return false;
     }
-    if (filter.type === 'bar' && !bar.types.includes('bar')) {
+    if (filter.type === 'bar' && !isBar(bar)) {
       return false;
     }
+
     // Rating filter
     if (filter.minRating !== undefined && (bar.rating ?? 0) < filter.minRating) {
       return false;
     }
+
     // Price level filter
     if (filter.maxPriceLevel !== undefined && (bar.priceLevel ?? 99) > filter.maxPriceLevel) {
       return false;
     }
+
     // Open now filter
     if (filter.openNow && bar.isOpen === false) {
       return false;
     }
-    // OSM tags filters
-    if (filter.realAle && !bar.osmTags?.real_ale) {
+
+    // Feature filters
+    if (filter.realAle && !hasFeature(bar, 'real_ale')) {
       return false;
     }
-    if (filter.realFire && !bar.osmTags?.real_fire) {
+    if (filter.realFire && !hasFeature(bar, 'real_fire')) {
       return false;
     }
-    if (filter.dog && !bar.osmTags?.dog) {
+    if (filter.dog && !hasFeature(bar, 'dog')) {
       return false;
     }
-    if (filter.wheelchair && !bar.osmTags?.wheelchair) {
+    if (filter.wheelchair && !hasFeature(bar, 'wheelchair')) {
       return false;
     }
+    if (filter.garden && !hasFeature(bar, 'garden')) {
+      return false;
+    }
+    if (filter.food && !hasFeature(bar, 'food')) {
+      return false;
+    }
+    if (filter.craftBeer && !hasFeature(bar, 'craft_beer')) {
+      return false;
+    }
+    if (filter.liveMusic && !hasFeature(bar, 'live_music')) {
+      return false;
+    }
+    if (filter.quizNight && !hasFeature(bar, 'quiz_night')) {
+      return false;
+    }
+    if (filter.boardGames && !hasFeature(bar, 'board_games')) {
+      return false;
+    }
+    if (filter.sundayRoast && !hasFeature(bar, 'sunday_roast')) {
+      return false;
+    }
+    if (filter.outdoorSeating && !hasFeature(bar, 'outdoor_seating')) {
+      return false;
+    }
+    if (filter.dj && !hasFeature(bar, 'dj')) {
+      return false;
+    }
+    if (filter.streetFood && !hasFeature(bar, 'street_food')) {
+      return false;
+    }
+    if (filter.nightlife && !hasFeature(bar, 'nightlife')) {
+      return false;
+    }
+    if (filter.cocktails && !hasFeature(bar, 'cocktails')) {
+      return false;
+    }
+
     return true;
   });
-  
-  return filtered;
 }
 
 // --- Simple test/demo ---

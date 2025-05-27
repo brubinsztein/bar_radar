@@ -1,121 +1,131 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { BarCountPill } from './BarCountPill';
 
+interface FilterBarProps {
+  selected: string[];
+  onSelect: (filter: string) => void;
+  count: number;
+  onSpecialFilter?: (filter: string) => void;
+  onClear?: () => void;
+}
+
 const FILTERS = [
-  { key: 'bar', label: 'Bar', emoji: '🍸' },
-  { key: 'pub', label: 'Pub', emoji: '🍺' },
-  { key: '4star', label: '4+ Stars', emoji: '⭐️' },
-  { key: 'openNow', label: 'Open Now', emoji: '🟢' },
-  { key: 'openLate', label: 'Open Late', emoji: '🌙' },
-  { key: 'deals', label: 'Deals', emoji: '🍻' },
-  { key: 'outside', label: 'Outside', emoji: '☀️' },
-  { key: 'garden', label: 'Garden', emoji: '🌳' },
-  { key: 'pool', label: 'Pool', emoji: '🎱' },
-  { key: 'realAle', label: 'Real Ale', emoji: '🍺' },
-  { key: 'realFire', label: 'Real Fire', emoji: '🔥' },
-  { key: 'dog', label: 'Dog Friendly', emoji: '🐶' },
-  { key: 'wheelchair', label: 'Wheelchair', emoji: '♿' },
+  { id: 'pub', label: 'Pubs', icon: '🍺' },
+  { id: 'bar', label: 'Bars', icon: '🍸' },
+  { id: '4star', label: '4★+', icon: '⭐' },
+  { id: 'openNow', label: 'Open Now', icon: '🕒' },
+  { id: 'realAle', label: 'Real Ale', icon: '🍺' },
+  { id: 'realFire', label: 'Fireplace', icon: '🔥' },
+  { id: 'dog', label: 'Dog Friendly', icon: '🐕' },
+  { id: 'wheelchair', label: 'Wheelchair', icon: '♿' },
+  { id: 'garden', label: 'Garden', icon: '🌳' },
+  { id: 'food', label: 'Food', icon: '🍽️' },
+  { id: 'craftBeer', label: 'Craft Beer', icon: '🍺' },
+  { id: 'liveMusic', label: 'Live Music', icon: '🎵' },
+  { id: 'quizNight', label: 'Quiz Night', icon: '❓' },
+  { id: 'boardGames', label: 'Board Games', icon: '🎲' },
+  { id: 'sundayRoast', label: 'Sunday Roast', icon: '🍖' },
+  { id: 'outdoorSeating', label: 'Outdoor', icon: '☀️' },
+  { id: 'dj', label: 'DJ', icon: '🎧' },
+  { id: 'streetFood', label: 'Street Food', icon: '🌮' },
+  { id: 'nightlife', label: 'Nightlife', icon: '🌙' },
+  { id: 'cocktails', label: 'Cocktails', icon: '🍹' },
 ];
 
-export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear }: {
-  selected: string[];
-  onSelect: (key: string) => void;
-  count: number;
-  onSpecialFilter?: (key: string) => void;
-  onClear?: () => void;
-}) {
+export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear }: FilterBarProps) {
   return (
     <View style={styles.container}>
-      {/* Subtle count bubble */}
-      <BarCountPill count={count} />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-        bounces={false}
       >
-        {/* Show Clear button if any filter is selected */}
-        {onClear && (
+        {FILTERS.map((filter) => (
           <TouchableOpacity
-            style={[styles.filter, styles.clearButton]}
-            onPress={onClear}
+            key={filter.id}
+            style={[
+              styles.filterButton,
+              selected.includes(filter.id) && styles.filterButtonSelected,
+            ]}
+            onPress={() => onSelect(filter.id)}
           >
-            <Text style={[styles.label, styles.clearLabel]}>Clear</Text>
-          </TouchableOpacity>
-        )}
-        {FILTERS.map(f => (
-          <TouchableOpacity
-            key={f.key}
-            style={[styles.filter, selected.includes(f.key) && styles.selected]}
-            onPress={() => {
-              if (["deals", "outside", "openLate"].includes(f.key)) {
-                onSpecialFilter && onSpecialFilter(f.key);
-              } else {
-                onSelect(f.key);
-              }
-            }}
-          >
-            <Text style={styles.emoji}>{f.emoji}</Text>
-            <Text style={[styles.label, selected.includes(f.key) && styles.selectedLabel]}>{f.label}</Text>
+            <Text style={styles.filterIcon}>{filter.icon}</Text>
+            <Text style={[
+              styles.filterLabel,
+              selected.includes(filter.id) && styles.filterLabelSelected,
+            ]}>
+              {filter.label}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
+      <View style={styles.footer}>
+        <BarCountPill count={count} />
+        {onClear && (
+          <TouchableOpacity onPress={onClear} style={styles.clearButton}>
+            <Text style={styles.clearButtonText}>Clear</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 28,
-    paddingVertical: 10,
+    backgroundColor: 'white',
+    borderRadius: 24,
+    padding: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 12,
-    overflow: 'visible',
-    zIndex: 9999,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
   },
   scrollContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingRight: 16,
   },
-  filter: {
+  filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F5F8FF',
-    borderRadius: 20,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    marginHorizontal: 4,
-    minWidth: 48,
-    maxWidth: '100%',
-    justifyContent: 'center',
+    borderRadius: 20,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#E5E9F2',
   },
-  selected: {
-    backgroundColor: '#E6E9FF',
+  filterButtonSelected: {
+    backgroundColor: '#5B4EFF',
+    borderColor: '#5B4EFF',
   },
-  emoji: {
-    fontSize: 22,
-    marginRight: 6,
-  },
-  label: {
+  filterIcon: {
     fontSize: 16,
-    color: '#222',
+    marginRight: 4,
   },
-  selectedLabel: {
+  filterLabel: {
+    fontSize: 14,
     color: '#5B4EFF',
-    fontWeight: 'bold',
+    fontWeight: '600',
+  },
+  filterLabelSelected: {
+    color: 'white',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
   },
   clearButton: {
-    backgroundColor: '#FF3B30',
-    marginRight: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
-  clearLabel: {
-    color: '#fff',
-    fontWeight: 'bold',
+  clearButtonText: {
+    color: '#5B4EFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 }); 

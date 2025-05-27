@@ -25,14 +25,17 @@ const FILTER_MAP: Record<string, Partial<BarFilter>> = {
   pub: { type: 'pub' },
   '4star': { minRating: 4 },
   openNow: { openNow: true },
-  outside: { type: 'pub', openNow: true },
-  garden: { type: 'bar', maxPriceLevel: 2 },
-  pool: { type: 'pub', minRating: 3.5 },
-  // openLate handled as a modal for now
   realAle: { realAle: true },
   realFire: { realFire: true },
   dog: { dog: true },
-  wheelchair: { wheelchair: true }
+  wheelchair: { wheelchair: true },
+  garden: { garden: true },
+  food: { food: true },
+  craftBeer: { craftBeer: true },
+  liveMusic: { liveMusic: true },
+  quizNight: { quizNight: true },
+  boardGames: { boardGames: true },
+  sundayRoast: { sundayRoast: true }
 };
 
 export function MainScreen() {

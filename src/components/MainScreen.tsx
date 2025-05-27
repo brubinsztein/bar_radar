@@ -12,6 +12,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { Bar } from '../types';
 import { BarDetailsSheet } from './BarDetailsSheet';
 
+// Hackney coordinates
+const HACKNEY_COORDS = {
+  latitude: 51.5432,
+  longitude: -0.0557,
+  latitudeDelta: 0.02,
+  longitudeDelta: 0.02,
+};
+
 const FILTER_MAP: Record<string, Partial<BarFilter>> = {
   bar: { type: 'bar' },
   pub: { type: 'pub' },
@@ -32,6 +40,7 @@ export function MainScreen() {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [showDealsModal, setShowDealsModal] = useState(false);
   const [selectedBar, setSelectedBar] = useState<Bar | null>(null);
+  const mapRef = useRef<MapView>(null);
 
   // Combine all selected filters into one BarFilter
   const combinedFilter: BarFilter = useMemo(() => {
@@ -106,13 +115,14 @@ export function MainScreen() {
           <HeaderBar />
         </View>
         <MapView
+          ref={mapRef}
           style={styles.mapPlaceholder}
           region={location.location ? {
             latitude: location.location.coords.latitude,
             longitude: location.location.coords.longitude,
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
-          } : MAP_CONFIG.DEFAULT_REGION}
+          } : HACKNEY_COORDS}
           showsCompass={false}
           showsMyLocationButton={false}
           toolbarEnabled={false}

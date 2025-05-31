@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { calculateSunExposure } from './sunExposure';
@@ -8,7 +9,7 @@ const port = Number(process.env.PORT) || 3000;
 app.use(cors());
 app.use(express.json());
 
-app.post('/sun-exposure', (req, res) => {
+app.post('/sun-exposure', async (req, res) => {
   const { latitude, longitude, datetime } = req.body;
   
   if (!latitude || !longitude || !datetime) {
@@ -16,7 +17,7 @@ app.post('/sun-exposure', (req, res) => {
   }
 
   try {
-    const result = calculateSunExposure(latitude, longitude, datetime);
+    const result = await calculateSunExposure(latitude, longitude, datetime);
     res.json(result);
   } catch (error) {
     console.error('Error calculating sun exposure:', error);

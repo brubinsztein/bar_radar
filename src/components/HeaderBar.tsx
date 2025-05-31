@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 export function HeaderBar() {
@@ -7,11 +7,14 @@ export function HeaderBar() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.left}>
-        <Text style={styles.logo}>🍺</Text>
-        <Text style={styles.title}>Bar Radar</Text>
-      </View>
-      <View style={styles.right}>
+      <View style={styles.row}>
+        <View style={styles.centerGroup}>
+          <Image source={require('../../assets/bar-radar-logo.png')} style={styles.logoImg} />
+          <View>
+            <Text style={styles.logoLabel}>Bar</Text>
+            <Text style={styles.logoLabel}>Radar</Text>
+          </View>
+        </View>
         <TouchableOpacity 
           style={styles.location}
           onPress={() => setShowInfoModal(true)}
@@ -19,9 +22,6 @@ export function HeaderBar() {
           <Text style={styles.locationIcon}>📍</Text>
           <Text style={styles.locationText}>Hackney, UK</Text>
           <Ionicons name="information-circle-outline" size={18} color="#5B4EFF" style={styles.infoIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menu}>
-          <Text style={styles.menuIcon}>☰</Text>
         </TouchableOpacity>
       </View>
 
@@ -39,14 +39,14 @@ export function HeaderBar() {
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Currently in Beta</Text>
-            <Text style={styles.modalText}>
+            <Text style={styles.modalLabel}>
               Bar Radar is currently available in Hackney only. We'll be launching across London soon!
             </Text>
             <TouchableOpacity 
               style={styles.modalButton}
               onPress={() => setShowInfoModal(false)}
             >
-              <Text style={styles.modalButtonText}>Got it!</Text>
+              <Text style={styles.modalButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -57,28 +57,39 @@ export function HeaderBar() {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: '#fff',
   },
-  left: {
+  centerGroup: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    gap: 4,
   },
-  logo: {
-    fontSize: 32,
-    marginRight: 8,
+  logoImg: {
+    width: 72,
+    height: 72,
+    resizeMode: 'contain',
+    marginRight: 3,
   },
-  title: {
+  logoLabel: {
     fontSize: 24,
-    fontWeight: 'bold',
     color: '#5B4EFF',
-  },
-  right: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    fontFamily: 'Tanker',
+    textAlign: 'left',
+    lineHeight: 28,
   },
   location: {
     flexDirection: 'row',
@@ -87,27 +98,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    marginRight: 12,
+    marginLeft: 16,
   },
   locationIcon: {
-    fontSize: 18,
+    fontSize: 16,
     marginRight: 4,
   },
   locationText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#222',
+    fontFamily: 'Tanker',
   },
   infoIcon: {
     marginLeft: 4,
-  },
-  menu: {
-    backgroundColor: '#F5F8FF',
-    borderRadius: 20,
-    padding: 8,
-  },
-  menuIcon: {
-    fontSize: 22,
-    color: '#222',
   },
   modalOverlay: {
     flex: 1,
@@ -124,17 +127,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#5B4EFF',
-    marginBottom: 12,
-  },
-  modalText: {
     fontSize: 16,
-    color: '#444',
+    color: '#222',
+    fontFamily: 'Tanker',
     textAlign: 'center',
     lineHeight: 24,
-    marginBottom: 24,
+    marginBottom: 12,
+  },
+  modalLabel: {
+    fontSize: 16,
+    color: '#5B4EFF',
+    fontFamily: 'Tanker',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 12,
   },
   modalButton: {
     backgroundColor: '#5B4EFF',
@@ -145,6 +151,7 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: 'Tanker',
+    textAlign: 'center',
   },
 }); 

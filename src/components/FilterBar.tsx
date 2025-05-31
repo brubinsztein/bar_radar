@@ -34,6 +34,10 @@ const FILTERS = [
 ];
 
 export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear }: FilterBarProps) {
+  // Split filters into two rows
+  const firstRowFilters = FILTERS.slice(0, Math.ceil(FILTERS.length / 2));
+  const secondRowFilters = FILTERS.slice(Math.ceil(FILTERS.length / 2));
+
   return (
     <View style={styles.container}>
       <View style={styles.countContainer}>
@@ -44,24 +48,48 @@ export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear 
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {FILTERS.map((filter) => (
-          <TouchableOpacity
-            key={filter.id}
-            style={[
-              styles.filterButton,
-              selected.includes(filter.id) && styles.filterButtonSelected,
-            ]}
-            onPress={() => onSelect(filter.id)}
-          >
-            <Text style={styles.filterIcon}>{filter.icon}</Text>
-            <Text style={[
-              styles.filterLabel,
-              selected.includes(filter.id) && styles.filterLabelSelected,
-            ]}>
-              {filter.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        <View style={styles.filtersContainer}>
+          <View style={styles.filterRow}>
+            {firstRowFilters.map((filter) => (
+              <TouchableOpacity
+                key={filter.id}
+                style={[
+                  styles.filterButton,
+                  selected.includes(filter.id) && styles.filterButtonSelected,
+                ]}
+                onPress={() => onSelect(filter.id)}
+              >
+                <Text style={styles.filterIcon}>{filter.icon}</Text>
+                <Text style={[
+                  styles.filterLabel,
+                  selected.includes(filter.id) && styles.filterLabelSelected,
+                ]}>
+                  {filter.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <View style={styles.filterRow}>
+            {secondRowFilters.map((filter) => (
+              <TouchableOpacity
+                key={filter.id}
+                style={[
+                  styles.filterButton,
+                  selected.includes(filter.id) && styles.filterButtonSelected,
+                ]}
+                onPress={() => onSelect(filter.id)}
+              >
+                <Text style={styles.filterIcon}>{filter.icon}</Text>
+                <Text style={[
+                  styles.filterLabel,
+                  selected.includes(filter.id) && styles.filterLabelSelected,
+                ]}>
+                  {filter.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
       </ScrollView>
       {onClear && (
         <TouchableOpacity onPress={onClear} style={styles.clearButton}>
@@ -92,6 +120,13 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingRight: 16,
   },
+  filtersContainer: {
+    marginTop: 8,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -115,9 +150,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#5B4EFF',
     fontWeight: '600',
+    fontFamily: 'Tanker',
   },
   filterLabelSelected: {
     color: 'white',
+    fontFamily: 'Tanker',
   },
   clearButton: {
     position: 'absolute',
@@ -130,5 +167,6 @@ const styles = StyleSheet.create({
     color: '#5B4EFF',
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Tanker',
   },
 }); 

@@ -37,5 +37,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 13,
     textAlign: 'center',
+    fontFamily: 'Tanker',
   },
 }); 

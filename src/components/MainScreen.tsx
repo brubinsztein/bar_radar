@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
   refreshButtonSubtle: {
     position: 'absolute',
-    top: 130,
+    top: 140,
     left: 16,
     backgroundColor: 'rgba(255,255,255,0.7)',
     borderRadius: 18,
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'absolute',
     right: 28,
-    bottom: 120,
+    bottom: 170,
     backgroundColor: '#5B4EFF',
     borderRadius: 32,
     width: 'auto',

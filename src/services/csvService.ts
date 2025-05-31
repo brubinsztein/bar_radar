@@ -54,40 +54,16 @@ export function parseCSVVenue(csvVenue: CSVVenue): Bar {
 
 export async function loadCSVVenues(): Promise<Bar[]> {
   try {
-    // Read the CSV file
-    const csvContent = await FileSystem.readAsStringAsync(
-      FileSystem.documentDirectory + '../assets/hackney_pubs_sample.csv'
-    );
-
-    // Parse CSV content
-    const lines = csvContent.split('\n').filter(line => line.trim());
-    const headers = lines[0].split(',');
-    
-    const venues: CSVVenue[] = lines.slice(1).map(line => {
-      const values = line.split(',');
-      const venue: any = {};
-      
-      headers.forEach((header, index) => {
-        let value = values[index] || '';
-        // Remove quotes if present
-        if (value.startsWith('"') && value.endsWith('"')) {
-          value = value.slice(1, -1);
-        }
-        venue[header.trim()] = value;
-      });
-      
-      return venue as CSVVenue;
-    });
-
-    return venues.map(parseCSVVenue);
+    // For now, use the sample data since we can't directly read the CSV file
+    // TODO: Implement proper CSV file reading when we have a better solution
+    return SAMPLE_VENUES.map(parseCSVVenue);
   } catch (error) {
     console.error('Error loading CSV venues:', error);
-    // Fallback to sample data if file reading fails
-    return SAMPLE_VENUES.map(parseCSVVenue);
+    return [];
   }
 }
 
-// Sample data for testing/fallback
+// Sample data for testing
 const SAMPLE_VENUES: CSVVenue[] = [
   {
     name: "The Dove",

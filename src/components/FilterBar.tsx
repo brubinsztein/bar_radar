@@ -36,6 +36,9 @@ const FILTERS = [
 export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear }: FilterBarProps) {
   return (
     <View style={styles.container}>
+      <View style={styles.countContainer}>
+        <BarCountPill count={count} />
+      </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -60,14 +63,11 @@ export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear 
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <View style={styles.footer}>
-        <BarCountPill count={count} />
-        {onClear && (
-          <TouchableOpacity onPress={onClear} style={styles.clearButton}>
-            <Text style={styles.clearButtonText}>Clear</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      {onClear && (
+        <TouchableOpacity onPress={onClear} style={styles.clearButton}>
+          <Text style={styles.clearButtonText}>Clear</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -82,6 +82,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 8,
+  },
+  countContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 1,
   },
   scrollContent: {
     paddingRight: 16,
@@ -113,13 +119,10 @@ const styles = StyleSheet.create({
   filterLabelSelected: {
     color: 'white',
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 12,
-  },
   clearButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },

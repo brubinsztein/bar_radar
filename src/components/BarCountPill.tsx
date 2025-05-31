@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export function BarCountPill({ count }: { count: number }) {
   return (
     <View style={styles.bubble}>
-      <Text style={styles.bubbleText}>{count}</Text>
+      <Text style={styles.bubbleText}>
+        {count} venue{count !== 1 ? 's' : ''} found
+      </Text>
     </View>
   );
 }
@@ -19,10 +20,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
-    top: -8,
-    left: -8,
+    top: -11,
+    left: -11,
     zIndex: 99999,
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
     borderWidth: 1,
     borderColor: '#fff',
     shadowColor: '#000',

@@ -52,7 +52,42 @@ export function parseCSVVenue(csvVenue: CSVVenue): Bar {
   };
 }
 
-// Sample data for testing
+export async function loadCSVVenues(): Promise<Bar[]> {
+  try {
+    // Read the CSV file
+    const csvContent = await FileSystem.readAsStringAsync(
+      FileSystem.documentDirectory + '../assets/hackney_pubs_sample.csv'
+    );
+
+    // Parse CSV content
+    const lines = csvContent.split('\n').filter(line => line.trim());
+    const headers = lines[0].split(',');
+    
+    const venues: CSVVenue[] = lines.slice(1).map(line => {
+      const values = line.split(',');
+      const venue: any = {};
+      
+      headers.forEach((header, index) => {
+        let value = values[index] || '';
+        // Remove quotes if present
+        if (value.startsWith('"') && value.endsWith('"')) {
+          value = value.slice(1, -1);
+        }
+        venue[header.trim()] = value;
+      });
+      
+      return venue as CSVVenue;
+    });
+
+    return venues.map(parseCSVVenue);
+  } catch (error) {
+    console.error('Error loading CSV venues:', error);
+    // Fallback to sample data if file reading fails
+    return SAMPLE_VENUES.map(parseCSVVenue);
+  }
+}
+
+// Sample data for testing/fallback
 const SAMPLE_VENUES: CSVVenue[] = [
   {
     name: "The Dove",
@@ -95,15 +130,33 @@ const SAMPLE_VENUES: CSVVenue[] = [
     website: "https://theoldshipinn.co.uk",
     description: "Cozy traditional pub with fireplace and Sunday roasts",
     features: "real_ale,fireplace,sunday_roast,dog_friendly"
+  },
+  {
+    name: "Night Tales",
+    latitude: "51.538765",
+    longitude: "-0.073421",
+    address: "14 Bohemia Place, London",
+    postcode: "E8 1DU",
+    phone: "2071754321",
+    alternative_names: "",
+    type: "bar",
+    opening_hours: "Th-Fr 18:00-00:00; Sa 14:00-00:00; Su 14:00-22:00",
+    website: "https://nighttales.co.uk",
+    description: "Vibrant bar and nightlife venue with outdoor space and DJs",
+    features: "cocktails,outdoor_seating,dj,street_food,nightlife"
+  },
+  {
+    name: "The Kenton",
+    latitude: "51.551234",
+    longitude: "-0.078901",
+    address: "38 Kenton Road, London",
+    postcode: "E9 7AB",
+    phone: "2072543214",
+    alternative_names: "",
+    type: "pub",
+    opening_hours: "Mo-Th 16:00-23:00; Fr-Sa 12:00-00:00; Su 12:00-22:30",
+    website: "https://thekentonpub.co.uk",
+    description: "Friendly neighborhood pub with quiz nights and local beers",
+    features: "quiz_night,real_ale,live_music,dog_friendly"
   }
-];
-
-export async function loadCSVVenues(): Promise<Bar[]> {
-  try {
-    // For now, return the sample data
-    return SAMPLE_VENUES.map(parseCSVVenue);
-  } catch (error) {
-    console.error('Error loading CSV venues:', error);
-    return [];
-  }
-} 
+]; 

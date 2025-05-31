@@ -12,6 +12,7 @@ interface UseBarsResult {
   fetchBars: (latitude: number, longitude: number) => Promise<void>;
   selectedBar: Bar | null;
   setSelectedBar: (bar: Bar | null) => void;
+  updateBars: (updatedBars: Bar[]) => void;
 }
 
 const MAX_AREAS = 7;
@@ -68,6 +69,10 @@ export function useBars(): UseBarsResult {
     }
   }, []);
 
+  const updateBars = useCallback((updatedBars: Bar[]) => {
+    setBars(updatedBars);
+  }, []);
+
   return {
     bars,
     isLoading,
@@ -75,5 +80,6 @@ export function useBars(): UseBarsResult {
     fetchBars,
     selectedBar,
     setSelectedBar,
+    updateBars,
   };
 } 

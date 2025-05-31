@@ -21,6 +21,7 @@ export interface BarFilter {
   streetFood?: boolean;
   nightlife?: boolean;
   cocktails?: boolean;
+  sunny?: boolean;
 }
 
 function isPub(bar: Bar): boolean {
@@ -137,6 +138,11 @@ export function filterBars(bars: Bar[], filter: BarFilter): Bar[] {
       return false;
     }
     if (filter.cocktails && !hasFeature(bar, 'cocktails')) {
+      return false;
+    }
+
+    // Sunny filter
+    if (filter.sunny && !bar.isInSun) {
       return false;
     }
 

@@ -11,18 +11,20 @@ interface FilterBarProps {
 }
 
 const FILTERS = [
+  { id: 'openNow', label: 'Open Now', icon: '🕒' },
   { id: 'pub', label: 'Pubs', icon: '🍺' },
   { id: 'bar', label: 'Bars', icon: '🍸' },
   { id: '4star', label: '4★+', icon: '⭐' },
-  { id: 'openNow', label: 'Open Now', icon: '🕒' },
+  { id: 'garden', label: 'Garden', icon: '🌳' },
+  { id: 'sunny', label: 'Sunny', icon: '☀️' },
   { id: 'realAle', label: 'Real Ale', icon: '🍺' },
+  { id: 'craftBeer', label: 'Craft Beer', icon: '🍺' },
+  { id: 'cocktails', label: 'Cocktails', icon: '🍹' },
+  { id: 'food', label: 'Food', icon: '🍽️' },
+  { id: 'liveMusic', label: 'Live Music', icon: '🎵' },
   { id: 'realFire', label: 'Fireplace', icon: '🔥' },
   { id: 'dog', label: 'Dog Friendly', icon: '🐕' },
   { id: 'wheelchair', label: 'Wheelchair', icon: '♿' },
-  { id: 'garden', label: 'Garden', icon: '🌳' },
-  { id: 'food', label: 'Food', icon: '🍽️' },
-  { id: 'craftBeer', label: 'Craft Beer', icon: '🍺' },
-  { id: 'liveMusic', label: 'Live Music', icon: '🎵' },
   { id: 'quizNight', label: 'Quiz Night', icon: '❓' },
   { id: 'boardGames', label: 'Board Games', icon: '🎲' },
   { id: 'sundayRoast', label: 'Sunday Roast', icon: '🍖' },
@@ -30,18 +32,25 @@ const FILTERS = [
   { id: 'dj', label: 'DJ', icon: '🎧' },
   { id: 'streetFood', label: 'Street Food', icon: '🌮' },
   { id: 'nightlife', label: 'Nightlife', icon: '🌙' },
-  { id: 'cocktails', label: 'Cocktails', icon: '🍹' },
 ];
 
 export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear }: FilterBarProps) {
-  // Split filters into two rows
-  const firstRowFilters = FILTERS.slice(0, Math.ceil(FILTERS.length / 2));
-  const secondRowFilters = FILTERS.slice(Math.ceil(FILTERS.length / 2));
+  // Create zigzag pattern for filters
+  const firstRowFilters = FILTERS.filter((_, index) => index % 2 === 0);
+  const secondRowFilters = FILTERS.filter((_, index) => index % 2 === 1);
 
   return (
     <View style={styles.container}>
-      <View style={styles.countContainer}>
-        <BarCountPill count={count} />
+      <View style={styles.topRow}>
+        <View style={styles.countContainer}>
+          <BarCountPill count={count} />
+        </View>
+        <View style={{ flex: 1 }} />
+        {onClear && (
+          <TouchableOpacity onPress={onClear} style={styles.clearButton}>
+            <Text style={styles.clearButtonText}>Clear all filters</Text>
+          </TouchableOpacity>
+        )}
       </View>
       <ScrollView
         horizontal
@@ -57,7 +66,7 @@ export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear 
                   styles.filterButton,
                   selected.includes(filter.id) && styles.filterButtonSelected,
                 ]}
-                onPress={() => onSelect(filter.id)}
+                onPress={() => filter.id === 'sunny' && onSpecialFilter ? onSpecialFilter(filter.id) : onSelect(filter.id)}
               >
                 <Text style={styles.filterIcon}>{filter.icon}</Text>
                 <Text style={[
@@ -77,7 +86,7 @@ export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear 
                   styles.filterButton,
                   selected.includes(filter.id) && styles.filterButtonSelected,
                 ]}
-                onPress={() => onSelect(filter.id)}
+                onPress={() => filter.id === 'sunny' && onSpecialFilter ? onSpecialFilter(filter.id) : onSelect(filter.id)}
               >
                 <Text style={styles.filterIcon}>{filter.icon}</Text>
                 <Text style={[
@@ -91,11 +100,6 @@ export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear 
           </View>
         </View>
       </ScrollView>
-      {onClear && (
-        <TouchableOpacity onPress={onClear} style={styles.clearButton}>
-          <Text style={styles.clearButtonText}>Clear</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 }
@@ -111,11 +115,15 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
   },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   countContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    zIndex: 1,
+    flexShrink: 0,
+    marginTop: 8,
+    marginBottom: 8,
   },
   scrollContent: {
     paddingRight: 16,
@@ -157,11 +165,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Tanker',
   },
   clearButton: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    minHeight: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
   },
   clearButtonText: {
     color: '#5B4EFF',

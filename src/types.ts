@@ -31,4 +31,5 @@ export interface Bar {
     opening_hours?: string;
     features?: string;
   };
+  isInSun?: boolean;
 } 

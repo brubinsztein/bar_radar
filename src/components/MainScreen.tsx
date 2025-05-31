@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, Modal, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Linking } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { HeaderBar } from './HeaderBar';
@@ -38,25 +38,55 @@ const FILTER_MAP: Record<string, Partial<BarFilter>> = {
   sundayRoast: { sundayRoast: true }
 };
 
+interface SunExposureResult {
+  isInSun: boolean;
+  azimuth: number;
+  elevation: number;
+}
+
 export function MainScreen() {
   const { bars, location } = useApp();
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [showDealsModal, setShowDealsModal] = useState(false);
   const [selectedBar, setSelectedBar] = useState<Bar | null>(null);
+  const [sunExposureCache, setSunExposureCache] = useState<Record<string, SunExposureResult>>({});
+  const [isLoadingSunData, setIsLoadingSunData] = useState(false);
   const mapRef = useRef<MapView>(null);
 
-  // Combine all selected filters into one BarFilter
-  const combinedFilter: BarFilter = useMemo(() => {
-    if (!selectedFilters.length) return {};
-    return selectedFilters.reduce((acc, key) => {
-      return { ...acc, ...FILTER_MAP[key] };
-    }, {} as BarFilter);
-  }, [selectedFilters]);
+  // Fetch sun exposure data for a bar
+  const fetchSunExposure = async (bar: Bar): Promise<SunExposureResult | null> => {
+    const cacheKey = `${bar.location.latitude},${bar.location.longitude}`;
+    
+    // Return cached result if available
+    if (sunExposureCache[cacheKey]) {
+      return sunExposureCache[cacheKey];
+    }
 
-  // Compute filtered bars
-  const filteredBars = useMemo(() => {
-    return filterBars(bars.bars, combinedFilter);
-  }, [bars.bars, combinedFilter]);
+    try {
+      const response = await fetch('http://192.168.0.6:3000/sun-exposure', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          latitude: bar.location.latitude,
+          longitude: bar.location.longitude,
+          datetime: new Date().toISOString(),
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch sun exposure data');
+      }
+
+      const data = await response.json();
+      setSunExposureCache(prev => ({ ...prev, [cacheKey]: data }));
+      return data;
+    } catch (error) {
+      console.error('Error fetching sun exposure:', error);
+      return null;
+    }
+  };
 
   // Handle filter selection (toggle on/off for multi-select)
   const handleFilterSelect = useCallback((filterKey: string) => {
@@ -70,8 +100,20 @@ export function MainScreen() {
   }, []);
 
   const handleSpecialFilter = useCallback((filterKey: string) => {
-    console.log('Special filter selected:', filterKey);
-    setShowDealsModal(true);
+    if (filterKey === 'sunny') {
+      // Handle sunny filter
+      setSelectedFilters(prev => {
+        if (prev.includes(filterKey)) {
+          return prev.filter(f => f !== filterKey);
+        } else {
+          return [...prev, filterKey];
+        }
+      });
+    } else {
+      // Show coming soon modal for other special filters
+      console.log('Special filter selected:', filterKey);
+      setShowDealsModal(true);
+    }
   }, []);
 
   // Handle clear filters
@@ -86,33 +128,80 @@ export function MainScreen() {
     Linking.openURL(url);
   };
 
-  // Global loading indicator
-  if (location.isLoading || bars.isLoading) {
-    // Only show loading screen if we don't have any data yet
-    if (!bars.bars.length && !location.location) {
-      console.log('SHOWING LOADING SCREEN', { locationLoading: location.isLoading, barsLoading: bars.isLoading });
-      return (
-        <View style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(255,255,255,0.85)',
-          zIndex: 99999,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
-          <ActivityIndicator size="large" color="#5B4EFF" />
-          <Text style={{ marginTop: 16, fontSize: 18, color: '#222' }}>Loading...</Text>
-        </View>
-      );
+  // Remove updateBarsWithSunData and useEffect that calls it
+  // Instead, fetch sun data for filtered bars when sunny filter is toggled ON
+  useEffect(() => {
+    const fetchAllSunData = async () => {
+      if (!selectedFilters.includes('sunny')) return;
+      setIsLoadingSunData(true);
+      try {
+        await Promise.all(
+          bars.bars.map(async (bar) => {
+            const cacheKey = `${bar.location.latitude},${bar.location.longitude}`;
+            if (!sunExposureCache[cacheKey]) {
+              const sunData = await fetchSunExposure(bar);
+              // sunExposureCache is updated in fetchSunExposure
+            }
+          })
+        );
+      } catch (error) {
+        console.error('Error fetching sun data:', error);
+      } finally {
+        setIsLoadingSunData(false);
+      }
+    };
+    fetchAllSunData();
+    // Only run when sunny filter is toggled ON
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFilters.includes('sunny')]);
+
+  // Combine all selected filters into one BarFilter
+  const combinedFilter: BarFilter = useMemo(() => {
+    if (!selectedFilters.length) return {};
+    return selectedFilters.reduce((acc, key) => {
+      return { ...acc, ...FILTER_MAP[key] };
+    }, {} as BarFilter);
+  }, [selectedFilters]);
+
+  // Compute filtered bars
+  const filteredBars = useMemo(() => {
+    let filtered = filterBars(bars.bars, combinedFilter);
+    if (selectedFilters.includes('sunny')) {
+      // Only show bars that are in sun according to sunExposureCache
+      filtered = filtered.filter(bar => {
+        const cacheKey = `${bar.location.latitude},${bar.location.longitude}`;
+        return sunExposureCache[cacheKey]?.isInSun;
+      });
+      console.log('Bars in sun:', filtered.map(bar => bar.name));
     }
-  }
+    return filtered;
+  }, [bars.bars, combinedFilter, selectedFilters, sunExposureCache]);
+
+  // Compute if we should show the loading screen
+  const shouldShowLoading = (location.isLoading || bars.isLoading || isLoadingSunData)
+    && !bars.bars.length && !location.location;
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
+        {shouldShowLoading ? (
+          <View style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(255,255,255,0.85)',
+            zIndex: 99999,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            <ActivityIndicator size="large" color="#5B4EFF" />
+            <Text style={{ marginTop: 16, fontSize: 18, color: '#222' }}>
+              {isLoadingSunData ? 'Checking sun exposure...' : 'Loading...'}
+            </Text>
+          </View>
+        ) : null}
         {/* Floating HeaderBar */}
         <View style={styles.floatingHeaderBarContainer} pointerEvents="box-none">
           <HeaderBar />
@@ -320,7 +409,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'absolute',
     right: 28,
-    bottom: 170,
+    bottom: 200,
     backgroundColor: '#5B4EFF',
     borderRadius: 32,
     width: 'auto',

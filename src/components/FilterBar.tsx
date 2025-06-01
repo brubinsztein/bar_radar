@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { BarCountPill } from './BarCountPill';
 
 interface FilterBarProps {
+  filters: { id: string; label: string; icon: string }[];
   selected: string[];
   onSelect: (filter: string) => void;
   count: number;
@@ -10,34 +11,10 @@ interface FilterBarProps {
   onClear?: () => void;
 }
 
-const FILTERS = [
-  { id: 'openNow', label: 'Open Now', icon: '🕒' },
-  { id: 'pub', label: 'Pubs', icon: '🍺' },
-  { id: 'bar', label: 'Bars', icon: '🍸' },
-  { id: '4star', label: '4★+', icon: '⭐' },
-  { id: 'garden', label: 'Garden', icon: '🌳' },
-  { id: 'sunny', label: 'Sunny', icon: '☀️' },
-  { id: 'realAle', label: 'Real Ale', icon: '🍺' },
-  { id: 'craftBeer', label: 'Craft Beer', icon: '🍺' },
-  { id: 'cocktails', label: 'Cocktails', icon: '🍹' },
-  { id: 'food', label: 'Food', icon: '🍽️' },
-  { id: 'liveMusic', label: 'Live Music', icon: '🎵' },
-  { id: 'realFire', label: 'Fireplace', icon: '🔥' },
-  { id: 'dog', label: 'Dog Friendly', icon: '🐕' },
-  { id: 'wheelchair', label: 'Wheelchair', icon: '♿' },
-  { id: 'quizNight', label: 'Quiz Night', icon: '❓' },
-  { id: 'boardGames', label: 'Board Games', icon: '🎲' },
-  { id: 'sundayRoast', label: 'Sunday Roast', icon: '🍖' },
-  { id: 'outdoorSeating', label: 'Outdoor', icon: '☀️' },
-  { id: 'dj', label: 'DJ', icon: '🎧' },
-  { id: 'streetFood', label: 'Street Food', icon: '🌮' },
-  { id: 'nightlife', label: 'Nightlife', icon: '🌙' },
-];
-
-export function FilterBar({ selected, onSelect, count, onSpecialFilter, onClear }: FilterBarProps) {
+export function FilterBar({ filters, selected, onSelect, count, onSpecialFilter, onClear }: FilterBarProps) {
   // Create zigzag pattern for filters
-  const firstRowFilters = FILTERS.filter((_, index) => index % 2 === 0);
-  const secondRowFilters = FILTERS.filter((_, index) => index % 2 === 1);
+  const firstRowFilters = filters.filter((_, index) => index % 2 === 0);
+  const secondRowFilters = filters.filter((_, index) => index % 2 === 1);
 
   return (
     <View style={styles.container}>

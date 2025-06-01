@@ -20,22 +20,41 @@ const HACKNEY_COORDS = {
   longitudeDelta: 0.02,
 };
 
-const FILTER_MAP: Record<string, Partial<BarFilter>> = {
-  bar: { type: 'bar' },
-  pub: { type: 'pub' },
-  '4star': { minRating: 4 },
-  openNow: { openNow: true },
-  realAle: { realAle: true },
-  realFire: { realFire: true },
-  dog: { dog: true },
-  wheelchair: { wheelchair: true },
-  garden: { garden: true },
-  food: { food: true },
-  craftBeer: { craftBeer: true },
-  liveMusic: { liveMusic: true },
-  quizNight: { quizNight: true },
-  boardGames: { boardGames: true },
-  sundayRoast: { sundayRoast: true }
+// Custom filters always present (Garden removed, Beer garden will be inserted dynamically)
+const CUSTOM_FILTERS = [
+  { id: 'openNow', label: 'Open Now', icon: '🕒' },
+  { id: 'pub', label: 'Pubs', icon: '🍺' },
+  { id: 'bar', label: 'Bars', icon: '🍸' },
+  { id: '4star', label: '4★+', icon: '⭐' },
+  { id: 'sunny', label: 'Sunny', icon: '☀️' }
+];
+
+// Map feature labels to emojis
+const FEATURE_EMOJIS: Record<string, string> = {
+  'Beer garden': '🌳',
+  'Cocktails': '🍹',
+  'Craft beer': '🍺',
+  'Dog-friendly': '🐶',
+  'Food menu': '🍽️',
+  'Late-night': '🌙',
+  'Live music': '🎵',
+  'Outdoor seating': '☀️',
+  'Real ale': '🍺',
+  'Sunday roast': '🍖',
+  'Trivia night': '❓',
+  'Wine': '🍷',
+  'Fireplace': '🔥',
+  'Karaoke': '🎤',
+  'LGBTQ+ friendly': '🏳️‍🌈',
+  'Dancing': '💃',
+  'Pool table': '🎱',
+  'Sports screening': '🏟️',
+  'Vegetarian options': '🥦',
+  'Vegan options': '🥗',
+  'DJ': '🎧',
+  'Street food': '🌮',
+  'Nightlife': '🌃',
+  'Board games': '🎲',
 };
 
 interface SunExposureResult {
@@ -52,6 +71,8 @@ export function MainScreen() {
   const [sunExposureCache, setSunExposureCache] = useState<Record<string, SunExposureResult>>({});
   const [isLoadingSunData, setIsLoadingSunData] = useState(false);
   const mapRef = useRef<MapView>(null);
+  const [venues, setVenues] = useState<Bar[]>([]);
+  const [dynamicFilters, setDynamicFilters] = useState<{id: string, label: string, icon: string}[]>([]);
 
   // Fetch sun exposure data for a bar
   const fetchSunExposure = async (bar: Bar): Promise<SunExposureResult | null> => {
@@ -155,7 +176,48 @@ export function MainScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFilters.includes('sunny')]);
 
-  // Combine all selected filters into one BarFilter
+  // Extract unique features from venues
+  useEffect(() => {
+    if (!venues.length) return;
+    const featureSet = new Set<string>();
+    venues.forEach(venue => {
+      if (venue.osmTags && venue.osmTags.features) {
+        venue.osmTags.features.split(',').forEach(f => featureSet.add(f.trim()));
+      }
+    });
+    let featureFilters = Array.from(featureSet).map(f => ({
+      id: f.replace(/[^a-zA-Z0-9]/g, ''),
+      label: f,
+      icon: FEATURE_EMOJIS[f] || '✨'
+    }));
+    // Ensure 'Beer garden' is the first dynamic filter if present
+    const beerGardenIndex = featureFilters.findIndex(f => f.label === 'Beer garden');
+    if (beerGardenIndex !== -1) {
+      const [beerGarden] = featureFilters.splice(beerGardenIndex, 1);
+      featureFilters = [beerGarden, ...featureFilters];
+    }
+    setDynamicFilters(featureFilters);
+  }, [venues]);
+
+  // Combine custom and dynamic filters for the UI
+  const FILTERS = useMemo(() => {
+    // Remove dynamic filters that are already in custom
+    const customIds = new Set(CUSTOM_FILTERS.map(f => f.id));
+    const filteredDynamic = dynamicFilters.filter(f => !customIds.has(f.id));
+    return [...CUSTOM_FILTERS, ...filteredDynamic];
+  }, [dynamicFilters]);
+
+  // Map filter id to filter logic
+  const FILTER_MAP: Record<string, Partial<BarFilter>> = {
+    bar: { type: 'bar' },
+    pub: { type: 'pub' },
+    '4star': { minRating: 4 },
+    openNow: { openNow: true },
+    sunny: { sunny: true }
+    // Dynamic features handled separately
+  };
+
+  // Combine all selected filters into one BarFilter (for custom filters)
   const combinedFilter: BarFilter = useMemo(() => {
     if (!selectedFilters.length) return {};
     return selectedFilters.reduce((acc, key) => {
@@ -165,9 +227,22 @@ export function MainScreen() {
 
   // Compute filtered bars
   const filteredBars = useMemo(() => {
-    let filtered = filterBars(bars.bars, combinedFilter);
+    // First, apply custom filter logic
+    let filtered = filterBars(venues, combinedFilter);
+    // Then, apply dynamic feature filters
+    const selectedDynamic = selectedFilters.filter(f => !FILTER_MAP[f]);
+    if (selectedDynamic.length) {
+      filtered = filtered.filter(bar =>
+        selectedDynamic.every(fId => {
+          // Find the label for this id
+          const filterObj = dynamicFilters.find(df => df.id === fId);
+          if (!filterObj) return true;
+          if (!bar.osmTags || !bar.osmTags.features) return false;
+          return bar.osmTags.features.split(',').map(f => f.trim()).includes(filterObj.label);
+        })
+      );
+    }
     if (selectedFilters.includes('sunny')) {
-      // Only show bars that are in sun according to sunExposureCache
       filtered = filtered.filter(bar => {
         const cacheKey = `${bar.location.latitude},${bar.location.longitude}`;
         return sunExposureCache[cacheKey]?.isInSun;
@@ -175,11 +250,27 @@ export function MainScreen() {
       console.log('Bars in sun:', filtered.map(bar => bar.name));
     }
     return filtered;
-  }, [bars.bars, combinedFilter, selectedFilters, sunExposureCache]);
+  }, [venues, combinedFilter, selectedFilters, sunExposureCache, dynamicFilters]);
 
   // Compute if we should show the loading screen
   const shouldShowLoading = (location.isLoading || bars.isLoading || isLoadingSunData)
     && !bars.bars.length && !location.location;
+
+  const fetchVenues = async () => {
+    if (!location.location) return;
+    try {
+      const response = await fetch(`http://192.168.0.6:4000/venues?lat=${location.location.coords.latitude}&lng=${location.location.coords.longitude}&radius=2000`);
+      if (!response.ok) throw new Error('Failed to fetch venues');
+      const data = await response.json();
+      setVenues(data.venues);
+    } catch (error) {
+      console.error('Error fetching venues:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchVenues();
+  }, [location.location]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -254,6 +345,7 @@ export function MainScreen() {
         {/* Floating FilterBar */}
         <View style={styles.floatingFilterBarContainer} pointerEvents="box-none">
           <FilterBar 
+            filters={FILTERS}
             selected={selectedFilters} 
             onSelect={handleFilterSelect} 
             count={filteredBars.length} 

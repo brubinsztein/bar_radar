@@ -25,11 +25,11 @@ export interface BarFilter {
 }
 
 function isPub(bar: Bar): boolean {
-  return bar.types?.includes('pub') || bar.osmTags?.amenity === 'pub';
+  return (bar.types?.some(t => t.toLowerCase() === 'pub')) || (bar.osmTags?.amenity?.toLowerCase() === 'pub');
 }
 
 function isBar(bar: Bar): boolean {
-  return bar.types?.includes('bar') || bar.osmTags?.amenity === 'bar';
+  return (bar.types?.some(t => t.toLowerCase() === 'bar')) || (bar.osmTags?.amenity?.toLowerCase() === 'bar');
 }
 
 function hasFeature(bar: Bar, feature: string): boolean {
@@ -40,30 +40,67 @@ function hasFeature(bar: Bar, feature: string): boolean {
   if (!featuresStr) return false;
 
   // Split the features string into an array and check if it includes the feature
-  const features = featuresStr.split(',');
-  
-  // Map feature names to their CSV equivalents
+  const features = featuresStr.split(',').map(f => f.trim());
+
+  // Map filter keys to human-readable feature names from the API
   const featureMap: Record<string, string> = {
-    'real_ale': 'real_ale',
-    'real_fire': 'fireplace',
-    'dog': 'dog_friendly',
-    'wheelchair': 'wheelchair',
-    'garden': 'garden',
-    'food': 'food',
-    'craft_beer': 'craft_beer',
-    'live_music': 'live_music',
-    'quiz_night': 'quiz_night',
-    'board_games': 'board_games',
-    'sunday_roast': 'sunday_roast',
-    'outdoor_seating': 'outdoor_seating',
-    'dj': 'dj',
-    'street_food': 'street_food',
-    'nightlife': 'nightlife',
-    'cocktails': 'cocktails'
+    realAle: 'Real ale',
+    realFire: 'Fireplace',
+    dog: 'Dog-friendly',
+    wheelchair: 'Wheelchair',
+    garden: 'Garden',
+    food: 'Food menu',
+    craftBeer: 'Craft beer',
+    liveMusic: 'Live music',
+    quizNight: 'Trivia night',
+    boardGames: 'Board games',
+    sundayRoast: 'Sunday roast',
+    outdoorSeating: 'Outdoor seating',
+    dj: 'DJ',
+    streetFood: 'Street food',
+    nightlife: 'Nightlife',
+    cocktails: 'Cocktails'
   };
 
-  const csvFeature = featureMap[feature];
-  return csvFeature ? features.includes(csvFeature) : false;
+  const apiFeature = featureMap[feature];
+  return apiFeature ? features.includes(apiFeature) : false;
+}
+
+// Utility: Check if a venue is open now based on OSM opening_hours string
+function isOpenNow(openingHours: string | undefined): boolean {
+  if (!openingHours) return false;
+  // Get current day and time
+  const now = new Date();
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const today = dayNames[now.getDay()];
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  // Split periods by |
+  const periods = openingHours.split('|');
+  for (const period of periods) {
+    const [day, open, close] = period.split(',').map(s => s.trim());
+    if (!day || !open || !close) continue;
+    if (day !== today) continue;
+    // Parse open/close times (e.g., 4PM, 11PM, 12AM, 10:30PM, 11pm)
+    const parseTime = (t: string) => {
+      let [h, m] = t.replace(/am|pm|AM|PM/gi, '').split(':');
+      let hour = parseInt(h);
+      let minute = m ? parseInt(m) : 0;
+      if (/pm|PM/i.test(t) && hour < 12) hour += 12;
+      if (/am|AM/i.test(t) && hour === 12) hour = 0;
+      if (/am|AM|pm|PM/i.test(t) === false && t.toLowerCase().includes('p') && hour < 12) hour += 12;
+      return hour * 60 + minute;
+    };
+    const openMins = parseTime(open);
+    const closeMins = parseTime(close);
+    // Handle venues that close after midnight
+    if (closeMins < openMins) {
+      if (currentMinutes >= openMins || currentMinutes < closeMins) return true;
+    } else {
+      if (currentMinutes >= openMins && currentMinutes < closeMins) return true;
+    }
+  }
+  return false;
 }
 
 export function filterBars(bars: Bar[], filter: BarFilter): Bar[] {
@@ -87,51 +124,43 @@ export function filterBars(bars: Bar[], filter: BarFilter): Bar[] {
     }
 
     // Open now filter
-    if (filter.openNow && bar.isOpen === false) {
-      return false;
+    if (filter.openNow) {
+      const openingHours = bar.osmTags?.opening_hours;
+      if (!isOpenNow(openingHours)) return false;
     }
 
     // Feature filters
-    if (filter.realAle && !hasFeature(bar, 'real_ale')) {
-      return false;
-    }
-    if (filter.realFire && !hasFeature(bar, 'real_fire')) {
-      return false;
-    }
-    if (filter.dog && !hasFeature(bar, 'dog')) {
-      return false;
-    }
-    if (filter.wheelchair && !hasFeature(bar, 'wheelchair')) {
-      return false;
-    }
-    if (filter.garden && !hasFeature(bar, 'garden')) {
-      return false;
-    }
+    if (filter.realAle && !hasFeature(bar, 'realAle')) return false;
+    if (filter.realFire && !hasFeature(bar, 'realFire')) return false;
+    if (filter.dog && !hasFeature(bar, 'dog')) return false;
+    if (filter.wheelchair && !hasFeature(bar, 'wheelchair')) return false;
+    // Garden = Outdoor seating
+    if (filter.garden && !hasFeature(bar, 'Outdoor seating')) return false;
     if (filter.food && !hasFeature(bar, 'food')) {
       return false;
     }
-    if (filter.craftBeer && !hasFeature(bar, 'craft_beer')) {
+    if (filter.craftBeer && !hasFeature(bar, 'craftBeer')) {
       return false;
     }
-    if (filter.liveMusic && !hasFeature(bar, 'live_music')) {
+    if (filter.liveMusic && !hasFeature(bar, 'liveMusic')) {
       return false;
     }
-    if (filter.quizNight && !hasFeature(bar, 'quiz_night')) {
+    if (filter.quizNight && !hasFeature(bar, 'quizNight')) {
       return false;
     }
-    if (filter.boardGames && !hasFeature(bar, 'board_games')) {
+    if (filter.boardGames && !hasFeature(bar, 'boardGames')) {
       return false;
     }
-    if (filter.sundayRoast && !hasFeature(bar, 'sunday_roast')) {
+    if (filter.sundayRoast && !hasFeature(bar, 'sundayRoast')) {
       return false;
     }
-    if (filter.outdoorSeating && !hasFeature(bar, 'outdoor_seating')) {
+    if (filter.outdoorSeating && !hasFeature(bar, 'outdoorSeating')) {
       return false;
     }
     if (filter.dj && !hasFeature(bar, 'dj')) {
       return false;
     }
-    if (filter.streetFood && !hasFeature(bar, 'street_food')) {
+    if (filter.streetFood && !hasFeature(bar, 'streetFood')) {
       return false;
     }
     if (filter.nightlife && !hasFeature(bar, 'nightlife')) {

@@ -41,7 +41,7 @@ function hasFeature(bar: Bar, feature: string): boolean {
 
   // Split the features string into an array and check if it includes the feature
   const features = featuresStr.split(',').map(f => f.trim());
-
+  
   // Map filter keys to human-readable feature names from the API
   const featureMap: Record<string, string> = {
     realAle: 'Real ale',

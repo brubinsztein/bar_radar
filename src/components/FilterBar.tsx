@@ -20,7 +20,7 @@ export function FilterBar({ filters, selected, onSelect, count, onSpecialFilter,
     <View style={styles.container}>
       <View style={styles.topRow}>
         <View style={styles.countContainer}>
-          <BarCountPill count={count} />
+      <BarCountPill count={count} />
         </View>
         <View style={{ flex: 1 }} />
         {onClear && (
@@ -37,14 +37,14 @@ export function FilterBar({ filters, selected, onSelect, count, onSpecialFilter,
         <View style={styles.filtersContainer}>
           <View style={styles.filterRow}>
             {firstRowFilters.map((filter) => (
-              <TouchableOpacity
+          <TouchableOpacity
                 key={filter.id}
                 style={[
                   styles.filterButton,
                   selected.includes(filter.id) && styles.filterButtonSelected,
                 ]}
                 onPress={() => filter.id === 'sunny' && onSpecialFilter ? onSpecialFilter(filter.id) : onSelect(filter.id)}
-              >
+          >
                 <Text style={styles.filterIcon}>{filter.icon}</Text>
                 <Text style={[
                   styles.filterLabel,
@@ -52,19 +52,19 @@ export function FilterBar({ filters, selected, onSelect, count, onSpecialFilter,
                 ]}>
                   {filter.label}
                 </Text>
-              </TouchableOpacity>
+          </TouchableOpacity>
             ))}
           </View>
           <View style={styles.filterRow}>
             {secondRowFilters.map((filter) => (
-              <TouchableOpacity
+          <TouchableOpacity
                 key={filter.id}
                 style={[
                   styles.filterButton,
                   selected.includes(filter.id) && styles.filterButtonSelected,
                 ]}
                 onPress={() => filter.id === 'sunny' && onSpecialFilter ? onSpecialFilter(filter.id) : onSelect(filter.id)}
-              >
+          >
                 <Text style={styles.filterIcon}>{filter.icon}</Text>
                 <Text style={[
                   styles.filterLabel,
@@ -72,8 +72,8 @@ export function FilterBar({ filters, selected, onSelect, count, onSpecialFilter,
                 ]}>
                   {filter.label}
                 </Text>
-              </TouchableOpacity>
-            ))}
+          </TouchableOpacity>
+        ))}
           </View>
         </View>
       </ScrollView>

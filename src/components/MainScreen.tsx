@@ -64,7 +64,7 @@ interface SunExposureResult {
 }
 
 export function MainScreen() {
-  const { bars, location } = useApp();
+  const { location } = useApp();
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [showDealsModal, setShowDealsModal] = useState(false);
   const [selectedBar, setSelectedBar] = useState<Bar | null>(null);
@@ -77,12 +77,10 @@ export function MainScreen() {
   // Fetch sun exposure data for a bar
   const fetchSunExposure = async (bar: Bar): Promise<SunExposureResult | null> => {
     const cacheKey = `${bar.location.latitude},${bar.location.longitude}`;
-    
     // Return cached result if available
     if (sunExposureCache[cacheKey]) {
       return sunExposureCache[cacheKey];
     }
-
     try {
       const response = await fetch('http://192.168.0.6:3000/sun-exposure', {
         method: 'POST',
@@ -95,11 +93,9 @@ export function MainScreen() {
           datetime: new Date().toISOString(),
         }),
       });
-      
       if (!response.ok) {
         throw new Error('Failed to fetch sun exposure data');
       }
-
       const data = await response.json();
       setSunExposureCache(prev => ({ ...prev, [cacheKey]: data }));
       return data;
@@ -132,8 +128,8 @@ export function MainScreen() {
       });
     } else {
       // Show coming soon modal for other special filters
-      console.log('Special filter selected:', filterKey);
-      setShowDealsModal(true);
+    console.log('Special filter selected:', filterKey);
+    setShowDealsModal(true);
     }
   }, []);
 
@@ -157,7 +153,7 @@ export function MainScreen() {
       setIsLoadingSunData(true);
       try {
         await Promise.all(
-          bars.bars.map(async (bar) => {
+          venues.map(async (bar) => {
             const cacheKey = `${bar.location.latitude},${bar.location.longitude}`;
             if (!sunExposureCache[cacheKey]) {
               const sunData = await fetchSunExposure(bar);
@@ -253,13 +249,13 @@ export function MainScreen() {
   }, [venues, combinedFilter, selectedFilters, sunExposureCache, dynamicFilters]);
 
   // Compute if we should show the loading screen
-  const shouldShowLoading = (location.isLoading || bars.isLoading || isLoadingSunData)
-    && !bars.bars.length && !location.location;
+  const shouldShowLoading = (isLoadingSunData) && !venues.length && !location.location;
 
+  // Load all venues on app load (ignore location for now)
   const fetchVenues = async () => {
-    if (!location.location) return;
     try {
-      const response = await fetch(`http://192.168.0.6:4000/venues?lat=${location.location.coords.latitude}&lng=${location.location.coords.longitude}&radius=2000`);
+      // For launch: load all venues, ignore location
+      const response = await fetch(`http://192.168.0.6:4000/venues?lat=51.5432&lng=-0.0557&radius=10000`); // Large radius to get all
       if (!response.ok) throw new Error('Failed to fetch venues');
       const data = await response.json();
       setVenues(data.venues);
@@ -270,28 +266,30 @@ export function MainScreen() {
 
   useEffect(() => {
     fetchVenues();
-  }, [location.location]);
+    // In the future, re-enable location-based search here
+    // e.g. by watching location.location
+  }, []);
 
-  return (
+      return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
         {shouldShowLoading ? (
-          <View style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(255,255,255,0.85)',
-            zIndex: 99999,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-            <ActivityIndicator size="large" color="#5B4EFF" />
+        <View style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(255,255,255,0.85)',
+          zIndex: 99999,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          <ActivityIndicator size="large" color="#5B4EFF" />
             <Text style={{ marginTop: 16, fontSize: 18, color: '#222' }}>
               {isLoadingSunData ? 'Checking sun exposure...' : 'Loading...'}
             </Text>
-          </View>
+        </View>
         ) : null}
         {/* Floating HeaderBar */}
         <View style={styles.floatingHeaderBarContainer} pointerEvents="box-none">

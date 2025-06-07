@@ -14,7 +14,7 @@ export function HeaderBar() {
             <Text style={styles.logoLabel}>Bar</Text>
             <Text style={styles.logoLabel}>Radar</Text>
           </View>
-        </View>
+      </View>
         <TouchableOpacity 
           style={styles.location}
           onPress={() => setShowInfoModal(true)}

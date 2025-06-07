@@ -58,7 +58,6 @@ export function BarDetailsSheet({ bar, visible, onClose }: BarDetailsSheetProps)
   }, [bar]);
 
   if (!bar) {
-    console.log('[BarDetailsSheet] No bar data, returning null');
     return null;
   }
 
@@ -87,61 +86,61 @@ export function BarDetailsSheet({ bar, visible, onClose }: BarDetailsSheetProps)
 
   return (
     <Portal>
-      <BottomSheet
-        ref={bottomSheetRef}
+    <BottomSheet
+      ref={bottomSheetRef}
         index={isVisible ? 0 : -1}
-        snapPoints={snapPoints}
-        enablePanDownToClose
-        onClose={onClose}
-        backdropComponent={renderBackdrop}
+      snapPoints={snapPoints}
+      enablePanDownToClose
+      onClose={onClose}
+      backdropComponent={renderBackdrop}
         handleIndicatorStyle={{ backgroundColor: '#999', width: 40 }}
         backgroundStyle={{ backgroundColor: 'white' }}
         style={styles.bottomSheet}
-      >
-        <View style={styles.contentContainer}>
-          <Text style={styles.title}>{bar.name}</Text>
-          <Text style={styles.address}>{bar.address}</Text>
-          {bar.rating && (
-            <Text style={styles.rating}>Rating: {bar.rating}⭐️</Text>
-          )}
-          {bar.isOpen !== undefined && (
-            <Text style={styles.status}>
-              {bar.isOpen ? 'Open Now' : 'Closed'}
-            </Text>
-          )}
-          {bar.priceLevel && (
-            <Text style={styles.priceLevel}>
-              Price Level: {'£'.repeat(bar.priceLevel)}
-            </Text>
-          )}
-          {/* OSM Tags Badges */}
-          {bar.osmTags && (
-            <View style={styles.osmTagsRow}>
-              {bar.osmTags.real_ale && (
-                <View style={styles.osmTagBadge}><Text style={styles.osmTagText}>🍺 Real Ale</Text></View>
-              )}
-              {bar.osmTags.real_fire && (
-                <View style={styles.osmTagBadge}><Text style={styles.osmTagText}>🔥 Real Fire</Text></View>
-              )}
-              {bar.osmTags.dog && (
-                <View style={styles.osmTagBadge}><Text style={styles.osmTagText}>🐶 Dog Friendly</Text></View>
-              )}
-              {bar.osmTags.wheelchair && (
-                <View style={styles.osmTagBadge}><Text style={styles.osmTagText}>♿ Wheelchair</Text></View>
-              )}
-            </View>
-          )}
-          {/* Show opening hours if available from OSM */}
-          {bar.osmTags?.opening_hours && (
+    >
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>{bar.name}</Text>
+        <Text style={styles.address}>{bar.address}</Text>
+        {bar.rating && (
+          <Text style={styles.rating}>Rating: {bar.rating}⭐️</Text>
+        )}
+        {bar.isOpen !== undefined && (
+          <Text style={styles.status}>
+            {bar.isOpen ? 'Open Now' : 'Closed'}
+          </Text>
+        )}
+        {bar.priceLevel && (
+          <Text style={styles.priceLevel}>
+            Price Level: {'£'.repeat(bar.priceLevel)}
+          </Text>
+        )}
+        {/* OSM Tags Badges */}
+        {bar.osmTags && (
+          <View style={styles.osmTagsRow}>
+            {bar.osmTags.real_ale && (
+              <View style={styles.osmTagBadge}><Text style={styles.osmTagText}>🍺 Real Ale</Text></View>
+            )}
+            {bar.osmTags.real_fire && (
+              <View style={styles.osmTagBadge}><Text style={styles.osmTagText}>🔥 Real Fire</Text></View>
+            )}
+            {bar.osmTags.dog && (
+              <View style={styles.osmTagBadge}><Text style={styles.osmTagText}>🐶 Dog Friendly</Text></View>
+            )}
+            {bar.osmTags.wheelchair && (
+              <View style={styles.osmTagBadge}><Text style={styles.osmTagText}>♿ Wheelchair</Text></View>
+            )}
+          </View>
+        )}
+        {/* Show opening hours if available from OSM */}
+        {bar.osmTags?.opening_hours && (
             <View style={styles.openingHoursContainer}>
               <Text style={styles.openingHoursTitle}>Opening Hours</Text>
-              {parseOpeningHours(bar.osmTags.opening_hours).map((line, idx) => (
+            {parseOpeningHours(bar.osmTags.opening_hours).map((line, idx) => (
                 <Text key={idx} style={styles.openingHoursText}>{line}</Text>
-              ))}
-            </View>
-          )}
-        </View>
-      </BottomSheet>
+            ))}
+          </View>
+        )}
+      </View>
+    </BottomSheet>
     </Portal>
   );
 }

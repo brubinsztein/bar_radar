@@ -32,4 +32,5 @@ export interface Bar {
     features?: string;
   };
   isInSun?: boolean;
+  working_hours?: string;
 } 

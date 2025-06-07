@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { FilterBar } from './components/FilterBar';
 import { Header } from './components/Header';
 import { VenueList } from './components/VenueList';
+import { globalStyles } from './styles/globalStyles';
+import { loadFonts } from './utils/fontLoader';
 
 interface Venue {
   name: string;
@@ -23,6 +25,23 @@ export default function App() {
   const [sunnyFilterActive, setSunnyFilterActive] = useState(false);
   const [sunExposureCache, setSunExposureCache] = useState<Record<string, SunExposureResult>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await loadFonts();
+        setFontsLoaded(true);
+      } catch (e) {
+        console.warn('Error loading fonts:', e);
+      }
+    }
+    prepare();
+  }, []);
+
+  if (!fontsLoaded) {
+    return null; // Or a loading screen
+  }
 
   const handleFilterSelect = (filter: string) => {
     setSelectedFilters(prev => [...prev, filter]);

@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
   venueName: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Tanker',
   },
   sunStatus: {
     fontSize: 14,

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { globalStyles } from '../styles/globalStyles';
 
 export function HeaderBar() {
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -14,7 +15,7 @@ export function HeaderBar() {
             <Text style={styles.logoLabel}>Bar</Text>
             <Text style={styles.logoLabel}>Radar</Text>
           </View>
-      </View>
+        </View>
         <TouchableOpacity 
           style={styles.location}
           onPress={() => setShowInfoModal(true)}
@@ -60,11 +61,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 24,
   },
   row: {
     flexDirection: 'row',

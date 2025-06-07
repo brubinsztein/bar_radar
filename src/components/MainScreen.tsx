@@ -63,6 +63,57 @@ interface SunExposureResult {
   elevation: number;
 }
 
+const DAYS = [
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+];
+
+function normalizeTime(raw: string): string {
+  if (!raw) return '';
+  let t = raw.trim().toUpperCase()
+    .replace(/P\.M\./i, 'PM').replace(/A\.M\./i, 'AM')
+    .replace(/P\.M/i, 'PM').replace(/A\.M/i, 'AM')
+    .replace(/PM\./i, 'PM').replace(/AM\./i, 'AM')
+    .replace(/P(?![M\.])/i, 'PM').replace(/A(?![M\.])/i, 'AM')
+    .replace('NOON', '12:00 PM')
+    .replace('MIDNIGHT', '12:00 AM');
+  // Add :00 if only hour is present
+  if (/^\d{1,2}(AM|PM)?$/.test(t)) {
+    t = t.replace(/^(\d{1,2})(AM|PM)?$/, '$1:00$2');
+  }
+  // Add AM/PM if missing and hour is 1-11
+  if (/^\d{1,2}:\d{2}$/.test(t)) {
+    const hour = parseInt(t.split(':')[0], 10);
+    if (hour >= 1 && hour <= 11) t += ' AM';
+    if (hour === 12) t += ' PM';
+  }
+  t = t.replace(/AM/i, 'AM').replace(/PM/i, 'PM');
+  return t;
+}
+
+function parseWorkingHours(workingHours: string): { day: string, open: string, close: string }[] {
+  const dayMap: Record<string, string> = {
+    'Monday': 'Monday', 'Tuesday': 'Tuesday', 'Wednesday': 'Wednesday',
+    'Thursday': 'Thursday', 'Friday': 'Friday', 'Saturday': 'Saturday', 'Sunday': 'Sunday'
+  };
+  const entries = workingHours.split('|').map(e => e.trim());
+  const result: { day: string, open: string, close: string }[] = [];
+  for (const entry of entries) {
+    const [day, open, close] = entry.split(',').map(s => s.trim());
+    result.push({
+      day: dayMap[day] || day,
+      open: normalizeTime(open),
+      close: normalizeTime(close)
+    });
+  }
+  // Ensure all days are present and in order
+  const ordered: { day: string, open: string, close: string }[] = [];
+  for (const day of DAYS) {
+    const found = result.find(r => r.day === day);
+    ordered.push(found || { day, open: '', close: '' });
+  }
+  return ordered;
+}
+
 export function MainScreen() {
   const { location } = useApp();
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
@@ -291,9 +342,43 @@ export function MainScreen() {
             </Text>
         </View>
         ) : null}
-        {/* Floating HeaderBar */}
-        <View style={styles.floatingHeaderBarContainer} pointerEvents="box-none">
-          <HeaderBar />
+        {/* Floating HeaderBar and Refresh Button Container */}
+        <View style={styles.headerContainer} pointerEvents="box-none">
+          {selectedBar ? (
+            <View style={styles.venueHeaderOverlay}>
+              <Text style={styles.venueHeaderText}>{selectedBar.name}</Text>
+              <View style={styles.venueHeaderDetails}>
+                <Text style={styles.venueHeaderAddress}>{selectedBar.address}</Text>
+                <View style={styles.venueHeaderStatus}>
+                  <View style={[
+                    styles.statusIndicator,
+                    { backgroundColor: selectedBar.isOpen ? '#4CAF50' : '#FF3B30' }
+                  ]} />
+                  <Text style={styles.statusText}>
+                    {selectedBar.isOpen ? 'Open now' : 'Closed now'}
+                  </Text>
+                </View>
+                {selectedBar.osmTags?.opening_hours && (
+                  <View>
+                    {parseWorkingHours(selectedBar.osmTags.opening_hours).map(({ day, open, close }) => (
+                      <Text style={styles.openingHours} key={day}>
+                        {day}: {open && close ? `${open} - ${close}` : 'Closed'}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </View>
+          ) : (
+            <HeaderBar />
+          )}
+          <TouchableOpacity
+            style={styles.refreshButtonSubtle}
+            onPress={location.requestPermission}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.refreshButtonIconSubtle}>📍</Text>
+          </TouchableOpacity>
         </View>
         <MapView
           ref={mapRef}
@@ -318,6 +403,7 @@ export function MainScreen() {
               }}
               title="You are here"
               pinColor="#5B4EFF"
+              onPress={() => setSelectedBar(null)}
             />
           )}
           {filteredBars.map((bar) => (
@@ -332,14 +418,6 @@ export function MainScreen() {
             />
           ))}
         </MapView>
-        {/* Subtle Refresh Location Button (top left) */}
-        <TouchableOpacity
-          style={styles.refreshButtonSubtle}
-          onPress={location.requestPermission}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.refreshButtonIconSubtle}>📍</Text>
-        </TouchableOpacity>
         {/* Floating FilterBar */}
         <View style={styles.floatingFilterBarContainer} pointerEvents="box-none">
           <FilterBar 
@@ -404,19 +482,12 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     borderColor: 'transparent',
   },
-  floatingHeaderBarContainer: {
+  headerContainer: {
     position: 'absolute',
     top: 36,
     left: 16,
     right: 16,
     zIndex: 200,
-    borderRadius: 24,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8,
   },
   modalOverlayAbsolute: {
     position: 'absolute',
@@ -465,23 +536,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   refreshButtonSubtle: {
-    position: 'absolute',
-    top: 140,
-    left: 16,
+    marginTop: 10,
     backgroundColor: 'rgba(255,255,255,0.7)',
     borderRadius: 18,
     width: 36,
     height: 36,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1000,
+    alignSelf: 'flex-start',
     borderWidth: 1,
     borderColor: '#eee',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
   },
   refreshButtonIconSubtle: {
     fontSize: 20,
@@ -522,5 +586,45 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.2)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
+  },
+  venueHeaderOverlay: {
+    backgroundColor: 'white',
+    borderRadius: 24,
+    padding: 16,
+  },
+  venueHeaderText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#222',
+    marginBottom: 8,
+    fontFamily: 'Tanker',
+  },
+  venueHeaderDetails: {
+    gap: 4,
+  },
+  venueHeaderAddress: {
+    fontSize: 14,
+    color: '#666',
+    fontFamily: 'Tanker',
+  },
+  venueHeaderStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontSize: 14,
+    color: '#222',
+    fontFamily: 'Tanker',
+  },
+  openingHours: {
+    fontSize: 14,
+    color: '#666',
+    fontFamily: 'Tanker',
   },
 }); 

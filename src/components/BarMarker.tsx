@@ -22,8 +22,6 @@ export function BarMarker({ bar, onPress, isSelected }: BarMarkerProps) {
         latitude: bar.location.latitude,
         longitude: bar.location.longitude,
       }}
-      title={bar.name}
-      description={bar.address}
       onPress={onPress}
       pinColor={isSelected ? "#5B4EFF" : "#FF3B30"}
     />

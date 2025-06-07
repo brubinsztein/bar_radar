@@ -124,6 +124,7 @@ export function MainScreen() {
   const mapRef = useRef<MapView>(null);
   const [venues, setVenues] = useState<Bar[]>([]);
   const [dynamicFilters, setDynamicFilters] = useState<{id: string, label: string, icon: string}[]>([]);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
   // Fetch sun exposure data for a bar
   const fetchSunExposure = async (bar: Bar): Promise<SunExposureResult | null> => {
@@ -350,19 +351,20 @@ export function MainScreen() {
               <View style={styles.venueHeaderDetails}>
                 <Text style={styles.venueHeaderAddress}>{selectedBar.address}</Text>
                 <View style={styles.venueHeaderStatus}>
-                  {selectedBar.osmTags?.opening_hours && (
-                    <>
+                  {selectedBar.osmTags && selectedBar.osmTags.opening_hours && (
+                    <TouchableOpacity onPress={() => setIsAccordionOpen(!isAccordionOpen)} style={styles.accordionHeader}>
                       <View style={[
                         styles.statusIndicator,
-                        { backgroundColor: isOpenNow(selectedBar.osmTags.opening_hours) ? '#4CAF50' : '#FF3B30' }
+                        { backgroundColor: isOpenNow(selectedBar.osmTags.opening_hours as string) ? '#4CAF50' : '#FF3B30' }
                       ]} />
                       <Text style={styles.statusText}>
-                        {isOpenNow(selectedBar.osmTags.opening_hours) ? 'Open now' : 'Closed now'}
+                        {isOpenNow(selectedBar.osmTags.opening_hours as string) ? 'Open now' : 'Closed now'}
                       </Text>
-                    </>
+                      <Ionicons name={isAccordionOpen ? 'chevron-up' : 'chevron-down'} size={20} color="#333" />
+                    </TouchableOpacity>
                   )}
                 </View>
-                {selectedBar.osmTags?.opening_hours && (
+                {isAccordionOpen && (
                   <View>
                     {parseWorkingHours(selectedBar.osmTags.opening_hours).map(({ day, open, close }) => (
                       <Text style={styles.openingHours} key={day}>
@@ -630,5 +632,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     fontFamily: 'Tanker',
+  },
+  accordionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
   },
 }); 

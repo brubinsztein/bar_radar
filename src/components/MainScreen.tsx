@@ -5,7 +5,7 @@ import { HeaderBar } from './HeaderBar';
 import { BarCountPill } from './BarCountPill';
 import { FilterBar } from './FilterBar';
 import { useApp } from '../core/AppContext';
-import { filterBars, BarFilter } from '../utils/filterBars';
+import { filterBars, BarFilter, isOpenNow } from '../utils/filterBars';
 import { MAP_CONFIG } from '../config/constants';
 import { BarMarker } from './BarMarker';
 import { Ionicons } from '@expo/vector-icons';
@@ -350,13 +350,17 @@ export function MainScreen() {
               <View style={styles.venueHeaderDetails}>
                 <Text style={styles.venueHeaderAddress}>{selectedBar.address}</Text>
                 <View style={styles.venueHeaderStatus}>
-                  <View style={[
-                    styles.statusIndicator,
-                    { backgroundColor: selectedBar.isOpen ? '#4CAF50' : '#FF3B30' }
-                  ]} />
-                  <Text style={styles.statusText}>
-                    {selectedBar.isOpen ? 'Open now' : 'Closed now'}
-                  </Text>
+                  {selectedBar.osmTags?.opening_hours && (
+                    <>
+                      <View style={[
+                        styles.statusIndicator,
+                        { backgroundColor: isOpenNow(selectedBar.osmTags.opening_hours) ? '#4CAF50' : '#FF3B30' }
+                      ]} />
+                      <Text style={styles.statusText}>
+                        {isOpenNow(selectedBar.osmTags.opening_hours) ? 'Open now' : 'Closed now'}
+                      </Text>
+                    </>
+                  )}
                 </View>
                 {selectedBar.osmTags?.opening_hours && (
                   <View>

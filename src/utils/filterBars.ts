@@ -66,8 +66,7 @@ function hasFeature(bar: Bar, feature: string): boolean {
   return apiFeature ? features.includes(apiFeature) : false;
 }
 
-// Utility: Check if a venue is open now based on OSM opening_hours string
-function isOpenNow(openingHours: string | undefined): boolean {
+export function isOpenNow(openingHours: string | undefined): boolean {
   if (!openingHours) return false;
   // Get current day and time
   const now = new Date();
